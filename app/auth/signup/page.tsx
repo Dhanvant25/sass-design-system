@@ -1,71 +1,96 @@
-"use client"
+"use client";
 
-import type React from "react"
+import { useState } from "react";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Eye,
+  EyeOff,
+  Mail,
+  Lock,
+  User,
+  Chrome,
+  Facebook,
+  ArrowLeft,
+  Check,
+} from "lucide-react";
 
-import { useState } from "react"
-import Link from "next/link"
-import { motion } from "framer-motion"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Eye, EyeOff, Mail, Lock, User, Chrome, Facebook, ArrowLeft, Check } from "lucide-react"
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { signupSchema } from "@/schema/auth/signupSchema";
+
+type SignUpFormData = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  acceptTerms: boolean;
+};
 
 export default function SignUpPage() {
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState("")
-  const [acceptTerms, setAcceptTerms] = useState(false)
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-  })
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    trigger,
+    watch,
+    setValue,
+  } = useForm<SignUpFormData>({
+    resolver: yupResolver(signupSchema),
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+      acceptTerms: false,
+    },
+  });
+
+  const password = watch("password");
 
   const passwordRequirements = [
-    { text: "At least 8 characters", met: formData.password.length >= 8 },
-    { text: "Contains uppercase letter", met: /[A-Z]/.test(formData.password) },
-    { text: "Contains lowercase letter", met: /[a-z]/.test(formData.password) },
-    { text: "Contains number", met: /\d/.test(formData.password) },
-  ]
+    { text: "At least 8 characters", met: password.length >= 8 },
+    { text: "Contains uppercase letter", met: /[A-Z]/.test(password) },
+    { text: "Contains lowercase letter", met: /[a-z]/.test(password) },
+    { text: "Contains number", met: /\d/.test(password) },
+  ];
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (formData.password !== formData.confirmPassword) {
-      setError("Passwords don't match")
-      return
-    }
-    if (!acceptTerms) {
-      setError("Please accept the terms and conditions")
-      return
-    }
+  const onSubmit = async (data: SignUpFormData) => {
+    setIsLoading(true);
+    console.log("Submitted data:", data);
 
-    setIsLoading(true)
-    setError("")
-
-    // Simulate API call
     setTimeout(() => {
-      setIsLoading(false)
-      // Redirect to onboarding
-      window.location.href = "/onboarding"
-    }, 2000)
-  }
+      setIsLoading(false);
+      window.location.href = "/onboarding";
+    }, 2000);
+  };
 
   const handleOAuthSignUp = (provider: string) => {
-    setIsLoading(true)
-    // Handle OAuth signup
-    console.log(`Sign up with ${provider}`)
-  }
+    setIsLoading(true);
+    console.log(`Sign up with ${provider}`);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center p-4">
-      {/* Background Elements */}
       <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))] dark:bg-grid-slate-700/25 dark:[mask-image:linear-gradient(0deg,rgba(255,255,255,0.1),rgba(255,255,255,0.5))]" />
 
       <motion.div
@@ -74,7 +99,6 @@ export default function SignUpPage() {
         transition={{ duration: 0.5 }}
         className="w-full max-w-md relative z-10"
       >
-        {/* Back to Home */}
         <Link
           href="/"
           className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors"
@@ -86,17 +110,13 @@ export default function SignUpPage() {
         <Card className="shadow-xl border-0 bg-card/80 backdrop-blur-sm">
           <CardHeader className="text-center pb-4">
             <CardTitle className="text-2xl font-bold">Create Account</CardTitle>
-            <CardDescription>Get started with your free account today</CardDescription>
+            <CardDescription>
+              Get started with your free account today
+            </CardDescription>
           </CardHeader>
 
           <CardContent className="space-y-6">
-            {error && (
-              <Alert variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-
-            {/* OAuth Buttons */}
+            {/* OAuth */}
             <div className="space-y-3">
               <Button
                 variant="outline"
@@ -124,12 +144,14 @@ export default function SignUpPage() {
                 <Separator className="w-full" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">Or continue with email</span>
+                <span className="bg-card px-2 text-muted-foreground">
+                  Or continue with email
+                </span>
               </div>
             </div>
 
             {/* Sign Up Form */}
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="firstName">First Name</Label>
@@ -140,11 +162,14 @@ export default function SignUpPage() {
                       type="text"
                       placeholder="John"
                       className="pl-10 h-11"
-                      value={formData.firstName}
-                      onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                      required
+                      {...register("firstName")}
                     />
                   </div>
+                  {errors.firstName && (
+                    <p className="text-sm text-red-500">
+                      {errors.firstName.message}
+                    </p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
@@ -154,10 +179,13 @@ export default function SignUpPage() {
                     type="text"
                     placeholder="Doe"
                     className="h-11"
-                    value={formData.lastName}
-                    onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                    required
+                    {...register("lastName")}
                   />
+                  {errors.lastName && (
+                    <p className="text-sm text-red-500">
+                      {errors.lastName.message}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -170,11 +198,12 @@ export default function SignUpPage() {
                     type="email"
                     placeholder="john@example.com"
                     className="pl-10 h-11"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    required
+                    {...register("email")}
                   />
                 </div>
+                {errors.email && (
+                  <p className="text-sm text-red-500">{errors.email.message}</p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -186,9 +215,7 @@ export default function SignUpPage() {
                     type={showPassword ? "text" : "password"}
                     placeholder="Create a strong password"
                     className="pl-10 pr-10 h-11"
-                    value={formData.password}
-                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    required
+                    {...register("password")}
                   />
                   <Button
                     type="button"
@@ -204,14 +231,29 @@ export default function SignUpPage() {
                     )}
                   </Button>
                 </div>
+                {errors.password && (
+                  <p className="text-sm text-red-500">
+                    {errors.password.message}
+                  </p>
+                )}
 
                 {/* Password Requirements */}
-                {formData.password && (
+                {password && (
                   <div className="space-y-1 mt-2">
                     {passwordRequirements.map((req, index) => (
                       <div key={index} className="flex items-center text-xs">
-                        <Check className={`w-3 h-3 mr-2 ${req.met ? "text-green-500" : "text-muted-foreground"}`} />
-                        <span className={req.met ? "text-green-600" : "text-muted-foreground"}>{req.text}</span>
+                        <Check
+                          className={`w-3 h-3 mr-2 ${
+                            req.met ? "text-green-500" : "text-muted-foreground"
+                          }`}
+                        />
+                        <span
+                          className={
+                            req.met ? "text-green-600" : "text-muted-foreground"
+                          }
+                        >
+                          {req.text}
+                        </span>
                       </div>
                     ))}
                   </div>
@@ -227,9 +269,7 @@ export default function SignUpPage() {
                     type={showConfirmPassword ? "text" : "password"}
                     placeholder="Confirm your password"
                     className="pl-10 pr-10 h-11"
-                    value={formData.confirmPassword}
-                    onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                    required
+                    {...register("confirmPassword")}
                   />
                   <Button
                     type="button"
@@ -245,30 +285,59 @@ export default function SignUpPage() {
                     )}
                   </Button>
                 </div>
+                {errors.confirmPassword && (
+                  <p className="text-sm text-red-500">
+                    {errors.confirmPassword.message}
+                  </p>
+                )}
               </div>
 
               <div className="flex items-center space-x-2">
-                <Checkbox id="terms" checked={acceptTerms} onCheckedChange={setAcceptTerms} />
+                <Checkbox
+                  id="terms"
+                  checked={watch("acceptTerms")}
+                  onCheckedChange={(val: boolean) => {
+                    setValue("acceptTerms", val, { shouldValidate: true });
+                    trigger("acceptTerms");
+                  }}
+                />
                 <Label htmlFor="terms" className="text-sm">
                   I agree to the{" "}
                   <Link href="/terms" className="text-primary hover:underline">
                     Terms of Service
                   </Link>{" "}
                   and{" "}
-                  <Link href="/privacy" className="text-primary hover:underline">
+                  <Link
+                    href="/privacy"
+                    className="text-primary hover:underline"
+                  >
                     Privacy Policy
                   </Link>
                 </Label>
               </div>
+              {errors.acceptTerms && (
+                <p className="text-sm text-red-500">
+                  {errors.acceptTerms.message}
+                </p>
+              )}
 
-              <Button type="submit" className="w-full h-11" disabled={isLoading || !acceptTerms}>
+              <Button
+                type="submit"
+                className="w-full h-11"
+                disabled={isLoading}
+              >
                 {isLoading ? "Creating account..." : "Create Account"}
               </Button>
             </form>
 
             <div className="text-center text-sm">
-              <span className="text-muted-foreground">Already have an account? </span>
-              <Link href="/auth/login" className="text-primary hover:underline font-medium">
+              <span className="text-muted-foreground">
+                Already have an account?{" "}
+              </span>
+              <Link
+                href="/auth/login"
+                className="text-primary hover:underline font-medium"
+              >
                 Sign in
               </Link>
             </div>
@@ -276,5 +345,5 @@ export default function SignUpPage() {
         </Card>
       </motion.div>
     </div>
-  )
+  );
 }

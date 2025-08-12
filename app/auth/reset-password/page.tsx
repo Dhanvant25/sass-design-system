@@ -1,71 +1,80 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
+import { useState } from "react";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { resetPasswordSchema } from "@/schema/auth/resetPasswordSchema";
 
-import { useState } from "react"
-import Link from "next/link"
-import { motion } from "framer-motion"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Eye, EyeOff, Lock, CheckCircle, Check } from "lucide-react"
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Eye, EyeOff, Lock, CheckCircle, Check } from "lucide-react";
+
+type FormValues = {
+  password: string;
+  confirmPassword: string;
+};
 
 export default function ResetPasswordPage() {
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [isSuccess, setIsSuccess] = useState(false)
-  const [error, setError] = useState("")
-  const [formData, setFormData] = useState({
-    password: "",
-    confirmPassword: "",
-  })
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors, isSubmitting },
+  } = useForm<FormValues>({
+    resolver: yupResolver(resetPasswordSchema),
+  });
+
+  const onSubmit = async (data: FormValues) => {
+    // Simulate API call
+    await new Promise((res) => setTimeout(res, 2000));
+    setIsSuccess(true);
+  };
+
+  const password = watch("password");
 
   const passwordRequirements = [
-    { text: "At least 8 characters", met: formData.password.length >= 8 },
-    { text: "Contains uppercase letter", met: /[A-Z]/.test(formData.password) },
-    { text: "Contains lowercase letter", met: /[a-z]/.test(formData.password) },
-    { text: "Contains number", met: /\d/.test(formData.password) },
-  ]
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (formData.password !== formData.confirmPassword) {
-      setError("Passwords don't match")
-      return
-    }
-
-    setIsLoading(true)
-    setError("")
-
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false)
-      setIsSuccess(true)
-    }, 2000)
-  }
+    { text: "At least 8 characters", met: password?.length >= 8 },
+    { text: "Contains uppercase letter", met: /[A-Z]/.test(password) },
+    { text: "Contains lowercase letter", met: /[a-z]/.test(password) },
+    { text: "Contains number", met: /\d/.test(password) },
+  ];
 
   if (isSuccess) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center p-4">
-        <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))] dark:bg-grid-slate-700/25 dark:[mask-image:linear-gradient(0deg,rgba(255,255,255,0.1),rgba(255,255,255,0.5))]" />
-
+      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background via-background to-primary/5">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
-          className="w-full max-w-md relative z-10"
+          className="w-full max-w-md z-10 relative"
         >
           <Card className="shadow-xl border-0 bg-card/80 backdrop-blur-sm text-center">
             <CardContent className="pt-6">
               <div className="w-16 h-16 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
                 <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
               </div>
-              <h2 className="text-xl font-semibold mb-2">Password Reset Successful</h2>
+              <h2 className="text-xl font-semibold mb-2">
+                Password Reset Successful
+              </h2>
               <p className="text-muted-foreground mb-6">
-                Your password has been successfully reset. You can now sign in with your new password.
+                Your password has been successfully reset. You can now sign in
+                with your new password.
               </p>
               <Button asChild className="w-full">
                 <Link href="/auth/login">Sign In</Link>
@@ -74,13 +83,11 @@ export default function ResetPasswordPage() {
           </Card>
         </motion.div>
       </div>
-    )
+    );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))] dark:bg-grid-slate-700/25 dark:[mask-image:linear-gradient(0deg,rgba(255,255,255,0.1),rgba(255,255,255,0.5))]" />
-
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background via-background to-primary/5">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -94,13 +101,7 @@ export default function ResetPasswordPage() {
           </CardHeader>
 
           <CardContent>
-            {error && (
-              <Alert variant="destructive" className="mb-6">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="password">New Password</Label>
                 <div className="relative">
@@ -110,9 +111,7 @@ export default function ResetPasswordPage() {
                     type={showPassword ? "text" : "password"}
                     placeholder="Enter new password"
                     className="pl-10 pr-10 h-11"
-                    value={formData.password}
-                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    required
+                    {...register("password")}
                   />
                   <Button
                     type="button"
@@ -128,14 +127,27 @@ export default function ResetPasswordPage() {
                     )}
                   </Button>
                 </div>
-
-                {/* Password Requirements */}
-                {formData.password && (
+                {errors.password && (
+                  <p className="text-xs text-red-500">
+                    {errors.password.message}
+                  </p>
+                )}
+                {password && (
                   <div className="space-y-1 mt-2">
                     {passwordRequirements.map((req, index) => (
                       <div key={index} className="flex items-center text-xs">
-                        <Check className={`w-3 h-3 mr-2 ${req.met ? "text-green-500" : "text-muted-foreground"}`} />
-                        <span className={req.met ? "text-green-600" : "text-muted-foreground"}>{req.text}</span>
+                        <Check
+                          className={`w-3 h-3 mr-2 ${
+                            req.met ? "text-green-500" : "text-muted-foreground"
+                          }`}
+                        />
+                        <span
+                          className={
+                            req.met ? "text-green-600" : "text-muted-foreground"
+                          }
+                        >
+                          {req.text}
+                        </span>
                       </div>
                     ))}
                   </div>
@@ -151,9 +163,7 @@ export default function ResetPasswordPage() {
                     type={showConfirmPassword ? "text" : "password"}
                     placeholder="Confirm new password"
                     className="pl-10 pr-10 h-11"
-                    value={formData.confirmPassword}
-                    onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                    required
+                    {...register("confirmPassword")}
                   />
                   <Button
                     type="button"
@@ -169,15 +179,24 @@ export default function ResetPasswordPage() {
                     )}
                   </Button>
                 </div>
+                {errors.confirmPassword && (
+                  <p className="text-xs text-red-500">
+                    {errors.confirmPassword.message}
+                  </p>
+                )}
               </div>
 
-              <Button type="submit" className="w-full h-11" disabled={isLoading}>
-                {isLoading ? "Resetting..." : "Reset Password"}
+              <Button
+                type="submit"
+                className="w-full h-11"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Resetting..." : "Reset Password"}
               </Button>
             </form>
           </CardContent>
         </Card>
       </motion.div>
     </div>
-  )
+  );
 }
