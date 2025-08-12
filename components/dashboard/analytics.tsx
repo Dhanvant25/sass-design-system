@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { Line, LineChart, XAxis, YAxis, CartesianGrid, ResponsiveContainer, PieChart, Pie, Cell } from "recharts"
 import { TrendingUp, TrendingDown, Users, Heart, MessageCircle, Share, Eye, Calendar, Download } from "lucide-react"
-import { useMobile } from "@/hooks/use-mobile"
+import { useIsMobile } from "@/hooks/use-mobile"
 
 const engagementData = [
   { date: "Jan 1", likes: 120, comments: 45, shares: 23, views: 1200 },
@@ -61,7 +61,7 @@ const topPosts = [
 
 export function Analytics() {
   const [timeRange, setTimeRange] = useState("7d")
-  const isMobile = useMobile()
+  const isMobile = useIsMobile()
 
   const stats = [
     {
