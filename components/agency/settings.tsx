@@ -1,22 +1,47 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { motion } from "framer-motion"
-import { Save, Users, Shield, Bell, CreditCard, Globe, Trash2, Plus } from "lucide-react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Switch } from "@/components/ui/switch"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useState } from "react";
+import { motion } from "framer-motion";
+import {
+  Save,
+  Users,
+  Shield,
+  Bell,
+  CreditCard,
+  Globe,
+  Trash2,
+  Plus,
+} from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { agencyInfoSchema } from "@/schema/agency/agencyInfoSchema";
 
 // Mock agency branding
 const agencyBranding = {
   primaryColor: "#6366F1",
-}
+};
 
 const teamMembers = [
   {
@@ -46,7 +71,15 @@ const teamMembers = [
     lastActive: "3 days ago",
     status: "inactive",
   },
-]
+];
+
+type AgencyInfoFormData = {
+  name: string;
+  email: string;
+  phone: string;
+  website: string;
+  address: string;
+};
 
 export function AgencySettings() {
   const [notifications, setNotifications] = useState({
@@ -54,19 +87,47 @@ export function AgencySettings() {
     postPublished: true,
     weeklyReports: true,
     systemUpdates: false,
-  })
+  });
 
   const handleNotificationChange = (key: string, value: boolean) => {
-    setNotifications((prev) => ({ ...prev, [key]: value }))
-  }
+    setNotifications((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<AgencyInfoFormData>({
+    resolver: yupResolver(agencyInfoSchema),
+    defaultValues: {
+      name: "Digital Marketing Pro",
+      email: "contact@digitalmarketingpro.com",
+      phone: "+1 (555) 123-4567",
+      website: "https://digitalmarketingpro.com",
+      address: "123 Business St, San Francisco, CA 94105",
+    },
+  });
+
+  const onSubmit = (data: AgencyInfoFormData) => {
+    console.log("Agency Info:", data);
+    // Perform save logic here
+  };
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Agency Settings</h1>
-          <p className="text-muted-foreground">Manage your agency account and team settings</p>
+          <h1 className="text-3xl font-bold text-foreground">
+            Agency Settings
+          </h1>
+          <p className="text-muted-foreground">
+            Manage your agency account and team settings
+          </p>
         </div>
       </motion.div>
 
@@ -90,7 +151,10 @@ export function AgencySettings() {
               <CreditCard className="w-4 h-4" />
               <span className="hidden sm:inline">Billing</span>
             </TabsTrigger>
-            <TabsTrigger value="notifications" className="flex items-center gap-2">
+            <TabsTrigger
+              value="notifications"
+              className="flex items-center gap-2"
+            >
               <Bell className="w-4 h-4" />
               <span className="hidden sm:inline">Notifications</span>
             </TabsTrigger>
@@ -102,43 +166,85 @@ export function AgencySettings() {
 
           {/* General Tab */}
           <TabsContent value="general" className="space-y-6">
-            <Card className="border-border/50">
-              <CardHeader>
-                <CardTitle>Agency Information</CardTitle>
-                <CardDescription>Basic information about your agency</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="agency-name">Agency Name</Label>
-                    <Input id="agency-name" defaultValue="Digital Marketing Pro" />
+            <form onSubmit={handleSubmit(onSubmit)}>
+              <Card className="border-border/50">
+                <CardHeader>
+                  <CardTitle>Agency Information</CardTitle>
+                  <CardDescription>
+                    Basic information about your agency
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="agency-name">Agency Name</Label>
+                      <Input id="agency-name" {...register("name")} />
+                      {errors.name && (
+                        <p className="text-sm text-red-500">
+                          {errors.name.message}
+                        </p>
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="agency-email">Contact Email</Label>
+                      <Input
+                        id="agency-email"
+                        type="email"
+                        {...register("email")}
+                      />
+                      {errors.email && (
+                        <p className="text-sm text-red-500">
+                          {errors.email.message}
+                        </p>
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="agency-phone">Phone Number</Label>
+                      <Input
+                        id="agency-phone"
+                        type="tel"
+                        {...register("phone")}
+                      />
+                      {errors.phone && (
+                        <p className="text-sm text-red-500">
+                          {errors.phone.message}
+                        </p>
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="agency-website">Website</Label>
+                      <Input
+                        id="agency-website"
+                        type="url"
+                        {...register("website")}
+                      />
+                      {errors.website && (
+                        <p className="text-sm text-red-500">
+                          {errors.website.message}
+                        </p>
+                      )}
+                    </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="agency-email">Contact Email</Label>
-                    <Input id="agency-email" type="email" defaultValue="contact@digitalmarketingpro.com" />
+                    <Label htmlFor="agency-address">Address</Label>
+                    <Input id="agency-address" {...register("address")} />
+                    {errors.address && (
+                      <p className="text-sm text-red-500">
+                        {errors.address.message}
+                      </p>
+                    )}
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="agency-phone">Phone Number</Label>
-                    <Input id="agency-phone" type="tel" defaultValue="+1 (555) 123-4567" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="agency-website">Website</Label>
-                    <Input id="agency-website" type="url" defaultValue="https://digitalmarketingpro.com" />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="agency-address">Address</Label>
-                  <Input id="agency-address" defaultValue="123 Business St, San Francisco, CA 94105" />
-                </div>
-                <Button
-                  style={{ backgroundColor: agencyBranding.primaryColor }}
-                  className="text-white hover:opacity-90"
-                >
-                  <Save className="w-4 h-4 mr-2" />
-                  Save Changes
-                </Button>
-              </CardContent>
-            </Card>
+                  <Button
+                    type="submit"
+                    style={{ backgroundColor: agencyBranding.primaryColor }}
+                    className="text-white hover:opacity-90"
+                  >
+                    <Save className="w-4 h-4 mr-2" />
+                    Save Changes
+                  </Button>
+                </CardContent>
+              </Card>
+            </form>
           </TabsContent>
 
           {/* Team Tab */}
@@ -148,7 +254,9 @@ export function AgencySettings() {
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle>Team Members</CardTitle>
-                    <CardDescription>Manage your agency team and their permissions</CardDescription>
+                    <CardDescription>
+                      Manage your agency team and their permissions
+                    </CardDescription>
                   </div>
                   <Button
                     style={{ backgroundColor: agencyBranding.primaryColor }}
@@ -167,17 +275,32 @@ export function AgencySettings() {
                   >
                     <div className="flex items-center gap-4">
                       <Avatar className="w-12 h-12">
-                        <AvatarImage src={member.avatar || "/placeholder.svg"} />
-                        <AvatarFallback>{member.name.slice(0, 2)}</AvatarFallback>
+                        <AvatarImage
+                          src={member.avatar || "/placeholder.svg"}
+                        />
+                        <AvatarFallback>
+                          {member.name.slice(0, 2)}
+                        </AvatarFallback>
                       </Avatar>
                       <div>
-                        <p className="font-medium text-foreground">{member.name}</p>
-                        <p className="text-sm text-muted-foreground">{member.email}</p>
-                        <p className="text-xs text-muted-foreground">Last active: {member.lastActive}</p>
+                        <p className="font-medium text-foreground">
+                          {member.name}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {member.email}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Last active: {member.lastActive}
+                        </p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
-                      <Badge variant={member.status === "active" ? "default" : "secondary"} className="text-xs">
+                      <Badge
+                        variant={
+                          member.status === "active" ? "default" : "secondary"
+                        }
+                        className="text-xs"
+                      >
                         {member.status}
                       </Badge>
                       <Select defaultValue={member.role.toLowerCase()}>
@@ -191,7 +314,11 @@ export function AgencySettings() {
                           <SelectItem value="viewer">Viewer</SelectItem>
                         </SelectContent>
                       </Select>
-                      <Button variant="outline" size="sm" className="text-red-600 bg-transparent">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-red-600 bg-transparent"
+                      >
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
@@ -206,7 +333,9 @@ export function AgencySettings() {
             <Card className="border-border/50">
               <CardHeader>
                 <CardTitle>Current Plan</CardTitle>
-                <CardDescription>Manage your agency subscription</CardDescription>
+                <CardDescription>
+                  Manage your agency subscription
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="flex items-center justify-between p-4 border border-border/50 rounded-lg">
@@ -215,7 +344,9 @@ export function AgencySettings() {
                     <p className="text-sm text-muted-foreground">
                       Unlimited clients • Custom branding • Priority support
                     </p>
-                    <p className="text-sm text-muted-foreground">Next billing date: Feb 15, 2024</p>
+                    <p className="text-sm text-muted-foreground">
+                      Next billing date: Feb 15, 2024
+                    </p>
                   </div>
                   <div className="text-right">
                     <p className="text-2xl font-bold">$199</p>
@@ -236,23 +367,31 @@ export function AgencySettings() {
             <Card className="border-border/50">
               <CardHeader>
                 <CardTitle>Usage Statistics</CardTitle>
-                <CardDescription>Your current usage across all clients</CardDescription>
+                <CardDescription>
+                  Your current usage across all clients
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="text-center p-4 bg-muted/50 rounded-lg">
                     <p className="text-2xl font-bold text-foreground">12</p>
-                    <p className="text-sm text-muted-foreground">Active Clients</p>
+                    <p className="text-sm text-muted-foreground">
+                      Active Clients
+                    </p>
                     <p className="text-xs text-muted-foreground">Unlimited</p>
                   </div>
                   <div className="text-center p-4 bg-muted/50 rounded-lg">
                     <p className="text-2xl font-bold text-foreground">1,247</p>
-                    <p className="text-sm text-muted-foreground">Posts This Month</p>
+                    <p className="text-sm text-muted-foreground">
+                      Posts This Month
+                    </p>
                     <p className="text-xs text-muted-foreground">Unlimited</p>
                   </div>
                   <div className="text-center p-4 bg-muted/50 rounded-lg">
                     <p className="text-2xl font-bold text-foreground">8</p>
-                    <p className="text-sm text-muted-foreground">Team Members</p>
+                    <p className="text-sm text-muted-foreground">
+                      Team Members
+                    </p>
                     <p className="text-xs text-muted-foreground">Unlimited</p>
                   </div>
                 </div>
@@ -265,60 +404,90 @@ export function AgencySettings() {
             <Card className="border-border/50">
               <CardHeader>
                 <CardTitle>Notification Preferences</CardTitle>
-                <CardDescription>Choose what notifications you want to receive</CardDescription>
+                <CardDescription>
+                  Choose what notifications you want to receive
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <Label htmlFor="client-signups" className="text-base font-medium">
+                      <Label
+                        htmlFor="client-signups"
+                        className="text-base font-medium"
+                      >
                         Client Signups
                       </Label>
-                      <p className="text-sm text-muted-foreground">Get notified when new clients join</p>
+                      <p className="text-sm text-muted-foreground">
+                        Get notified when new clients join
+                      </p>
                     </div>
                     <Switch
                       id="client-signups"
                       checked={notifications.clientSignups}
-                      onCheckedChange={(checked) => handleNotificationChange("clientSignups", checked)}
+                      onCheckedChange={(checked) =>
+                        handleNotificationChange("clientSignups", checked)
+                      }
                     />
                   </div>
                   <div className="flex items-center justify-between">
                     <div>
-                      <Label htmlFor="post-published" className="text-base font-medium">
+                      <Label
+                        htmlFor="post-published"
+                        className="text-base font-medium"
+                      >
                         Posts Published
                       </Label>
-                      <p className="text-sm text-muted-foreground">Get notified when client posts are published</p>
+                      <p className="text-sm text-muted-foreground">
+                        Get notified when client posts are published
+                      </p>
                     </div>
                     <Switch
                       id="post-published"
                       checked={notifications.postPublished}
-                      onCheckedChange={(checked) => handleNotificationChange("postPublished", checked)}
+                      onCheckedChange={(checked) =>
+                        handleNotificationChange("postPublished", checked)
+                      }
                     />
                   </div>
                   <div className="flex items-center justify-between">
                     <div>
-                      <Label htmlFor="weekly-reports" className="text-base font-medium">
+                      <Label
+                        htmlFor="weekly-reports"
+                        className="text-base font-medium"
+                      >
                         Weekly Reports
                       </Label>
-                      <p className="text-sm text-muted-foreground">Receive weekly performance reports</p>
+                      <p className="text-sm text-muted-foreground">
+                        Receive weekly performance reports
+                      </p>
                     </div>
                     <Switch
                       id="weekly-reports"
                       checked={notifications.weeklyReports}
-                      onCheckedChange={(checked) => handleNotificationChange("weeklyReports", checked)}
+                      onCheckedChange={(checked) =>
+                        handleNotificationChange("weeklyReports", checked)
+                      }
                     />
                   </div>
                   <div className="flex items-center justify-between">
                     <div>
-                      <Label htmlFor="system-updates" className="text-base font-medium">
+                      <Label
+                        htmlFor="system-updates"
+                        className="text-base font-medium"
+                      >
                         System Updates
                       </Label>
-                      <p className="text-sm text-muted-foreground">Get notified about platform updates</p>
+                      <p className="text-sm text-muted-foreground">
+                        Get notified about platform updates
+                      </p>
                     </div>
                     <Switch
                       id="system-updates"
                       checked={notifications.systemUpdates}
-                      onCheckedChange={(checked) => handleNotificationChange("systemUpdates", checked)}
+                      onCheckedChange={(checked) =>
+                        handleNotificationChange("systemUpdates", checked)
+                      }
                     />
                   </div>
                 </div>
@@ -338,14 +507,18 @@ export function AgencySettings() {
             <Card className="border-border/50">
               <CardHeader>
                 <CardTitle>Security Settings</CardTitle>
-                <CardDescription>Manage security settings for your agency account</CardDescription>
+                <CardDescription>
+                  Manage security settings for your agency account
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="font-medium">Two-Factor Authentication</p>
-                      <p className="text-sm text-muted-foreground">Add an extra layer of security</p>
+                      <p className="text-sm text-muted-foreground">
+                        Add an extra layer of security
+                      </p>
                     </div>
                     <Badge variant="outline">Not Enabled</Badge>
                   </div>
@@ -358,9 +531,15 @@ export function AgencySettings() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="font-medium">Session Management</p>
-                      <p className="text-sm text-muted-foreground">Manage active sessions</p>
+                      <p className="text-sm text-muted-foreground">
+                        Manage active sessions
+                      </p>
                     </div>
-                    <Button variant="outline" size="sm" className="bg-transparent">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="bg-transparent"
+                    >
                       View Sessions
                     </Button>
                   </div>
@@ -370,9 +549,15 @@ export function AgencySettings() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="font-medium">API Access</p>
-                      <p className="text-sm text-muted-foreground">Manage API keys and access</p>
+                      <p className="text-sm text-muted-foreground">
+                        Manage API keys and access
+                      </p>
                     </div>
-                    <Button variant="outline" size="sm" className="bg-transparent">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="bg-transparent"
+                    >
                       Manage API Keys
                     </Button>
                   </div>
@@ -383,5 +568,5 @@ export function AgencySettings() {
         </Tabs>
       </motion.div>
     </div>
-  )
+  );
 }
