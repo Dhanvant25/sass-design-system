@@ -155,7 +155,7 @@ export function ServiceAnalytics() {
                 color: "hsl(var(--chart-1))",
               },
             }}
-            className="h-[300px]"
+            className="h-[300px] w-full max-w-xl"
           >
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={peakPostingTimes}>
@@ -188,7 +188,7 @@ export function ServiceAnalytics() {
                 color: "hsl(var(--chart-2))",
               },
             }}
-            className="h-[300px]"
+            className="h-[300px] w-full max-w-xl"
           >
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={dailyActivity}>

@@ -124,7 +124,7 @@ export function AdminDashboard() {
                   color: "hsl(var(--chart-2))",
                 },
               }}
-              className="h-[300px]"
+              className="h-[300px] w-full"
             >
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={userGrowthData}>
@@ -157,7 +157,7 @@ export function AdminDashboard() {
                   color: "hsl(var(--chart-4))",
                 },
               }}
-              className="h-[300px]"
+              className="h-[300px] w-full"
             >
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={revenueData}>

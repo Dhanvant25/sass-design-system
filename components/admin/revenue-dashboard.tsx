@@ -139,7 +139,7 @@ export function RevenueDashboard() {
                   color: "hsl(var(--chart-2))",
                 },
               }}
-              className="h-[300px]"
+              className="h-[300px] w-full"
             >
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={monthlyRevenue}>
@@ -168,7 +168,7 @@ export function RevenueDashboard() {
                 agency: { label: "Agency", color: "#ffc658" },
                 enterprise: { label: "Enterprise", color: "#ff7300" },
               }}
-              className="h-[300px]"
+              className="h-[300px] w-full"
             >
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>

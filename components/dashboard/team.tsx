@@ -19,7 +19,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { MobileTable } from "@/components/mobile/mobile-table"
 import { Plus, MoreHorizontal, Mail, Shield, User, Crown, Settings, Trash2 } from "lucide-react"
-import { useMobile } from "@/hooks/use-mobile"
+import { useIsMobile } from "@/hooks/use-mobile"
 
 const teamMembers = [
   {
@@ -86,7 +86,7 @@ export function Team() {
   const [isInviteOpen, setIsInviteOpen] = useState(false)
   const [inviteEmail, setInviteEmail] = useState("")
   const [inviteRole, setInviteRole] = useState("Viewer")
-  const isMobile = useMobile()
+  const isMobile = useIsMobile()
 
   const handleInvite = () => {
     // Handle invite logic here
