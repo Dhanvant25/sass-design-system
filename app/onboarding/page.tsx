@@ -1,49 +1,63 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import { Button } from "@/components/ui/button"
-import { Progress } from "@/components/ui/progress"
-import { WelcomeStep } from "@/components/onboarding/welcome-step"
-import { ConnectAccountStep } from "@/components/onboarding/connect-account-step"
-import { BrandAssetsStep } from "@/components/onboarding/brand-assets-step"
-import { FirstPostStep } from "@/components/onboarding/first-post-step"
-import { ArrowLeft, ArrowRight } from "lucide-react"
+import { useState, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { WelcomeStep } from "@/components/onboarding/welcome-step";
+import { ConnectAccountStep } from "@/components/onboarding/connect-account-step";
+// import type { BrandAssetsStepHandle } from "@/components/onboarding/brand-assets-step"
+import BrandAssetsStep, {
+  BrandAssetsStepHandle,
+} from "@/components/onboarding/brand-assets-step";
+import { FirstPostStep } from "@/components/onboarding/first-post-step";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 
 const steps = [
   { id: 1, title: "Welcome", component: WelcomeStep },
   { id: 2, title: "Connect Account", component: ConnectAccountStep },
   { id: 3, title: "Brand Assets", component: BrandAssetsStep },
   { id: 4, title: "First Post", component: FirstPostStep },
-]
+];
 
 export default function OnboardingPage() {
-  const [currentStep, setCurrentStep] = useState(1)
-  const [completedSteps, setCompletedSteps] = useState<number[]>([])
+  const [currentStep, setCurrentStep] = useState(1);
+  const [completedSteps, setCompletedSteps] = useState<number[]>([]);
+  const brandAssetsRef = useRef<BrandAssetsStepHandle>(null);
 
-  const progress = ((currentStep - 1) / (steps.length - 1)) * 100
+  const progress = ((currentStep - 1) / (steps.length - 1)) * 100;
 
-  const handleNext = () => {
+  const handleNext = async () => {
+    const current = steps.find((step) => step.id === currentStep);
+
+    if (current?.id === 3) {
+      if (!brandAssetsRef.current) return;
+      const isValid = await brandAssetsRef.current.validate();
+      if (!isValid) return;
+    }
+
     if (currentStep < steps.length) {
-      setCompletedSteps([...completedSteps, currentStep])
-      setCurrentStep(currentStep + 1)
+      setCompletedSteps([...completedSteps, currentStep]);
+      setCurrentStep(currentStep + 1);
     } else {
       // Complete onboarding
-      window.location.href = "/dashboard"
+      window.location.href = "/dashboard";
     }
-  }
+  };
 
   const handleBack = () => {
     if (currentStep > 1) {
-      setCurrentStep(currentStep - 1)
+      setCurrentStep(currentStep - 1);
     }
-  }
+  };
 
   const handleSkip = () => {
-    window.location.href = "/dashboard"
-  }
+    window.location.href = "/dashboard";
+  };
 
-  const CurrentStepComponent = steps.find((step) => step.id === currentStep)?.component
+  const CurrentStepComponent = steps.find(
+    (step) => step.id === currentStep
+  )?.component;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
@@ -77,14 +91,16 @@ export default function OnboardingPage() {
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-2xl mx-auto">
             <AnimatePresence mode="wait">
-              <motion.div
-                key={currentStep}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.3 }}
-              >
-                {CurrentStepComponent && <CurrentStepComponent onNext={handleNext} />}
+              <motion.div key={currentStep}>
+                {CurrentStepComponent &&
+                  (currentStep === 3 ? (
+                    <CurrentStepComponent
+                      ref={brandAssetsRef}
+                      onNext={handleNext}
+                    />
+                  ) : (
+                    <CurrentStepComponent onNext={handleNext} />
+                  ))}
               </motion.div>
             </AnimatePresence>
           </div>
@@ -112,8 +128,8 @@ export default function OnboardingPage() {
                       step.id === currentStep
                         ? "bg-primary"
                         : completedSteps.includes(step.id)
-                          ? "bg-primary/60"
-                          : "bg-muted"
+                        ? "bg-primary/60"
+                        : "bg-muted"
                     }`}
                   />
                 ))}
@@ -128,5 +144,5 @@ export default function OnboardingPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
