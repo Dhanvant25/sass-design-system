@@ -31,6 +31,9 @@ import {
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { signupSchema } from "@/schema/auth/signupSchema";
+import { signup } from "@/api/auth";
+import { useAuth } from "@/store/AuthContext";
+import toast, { Toaster } from "react-hot-toast";
 
 type SignUpFormData = {
   firstName: string;
@@ -45,6 +48,7 @@ export default function SignUpPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const { setUserData } = useAuth();
 
   const {
     register,
@@ -76,12 +80,20 @@ export default function SignUpPage() {
 
   const onSubmit = async (data: SignUpFormData) => {
     setIsLoading(true);
-    console.log("Submitted data:", data);
 
-    setTimeout(() => {
+    try {
+      const user = await signup(data);
+      if (user) {
+        console.log("Logged in:", user);
+        setUserData(user);
+        toast.success("Registration successful. Please check your email to verify your account.");
+      }
+    } catch (err: any) {
+      console.error("Register error", err);
+      toast.error(err?.response?.data?.message || "Error occurred");
+    } finally {
       setIsLoading(false);
-      window.location.href = "/onboarding";
-    }, 2000);
+    }
   };
 
   const handleOAuthSignUp = (provider: string) => {
@@ -344,6 +356,7 @@ export default function SignUpPage() {
           </CardContent>
         </Card>
       </motion.div>
+      <Toaster />
     </div>
   );
 }

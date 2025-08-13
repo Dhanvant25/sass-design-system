@@ -30,6 +30,8 @@ import {
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { loginSchema } from "@/schema/auth/loginSchema";
+import { login } from "@/api/auth";
+import { useAuth } from "@/store/AuthContext";
 
 type LoginFormData = {
   email: string;
@@ -40,6 +42,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [serverError, setServerError] = useState("");
+  const { setUserData } = useAuth();
 
   const {
     register,
@@ -53,9 +56,18 @@ export default function LoginPage() {
     setIsLoading(true);
     setServerError("");
 
-    setTimeout(() => {
+    try {
+      const user = await login(data);
+      if (user) {
+        console.log("Logged in:", user);
+        // setUserData(user);
+        // window.location.href = "/onboarding";
+      }
+    } catch (err) {
+      console.error("Login error", err);
+    } finally {
       setIsLoading(false);
-    }, 2000);
+    }
   };
 
   const handleOAuthLogin = (provider: string) => {

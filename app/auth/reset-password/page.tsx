@@ -21,6 +21,11 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Eye, EyeOff, Lock, CheckCircle, Check } from "lucide-react";
 
+import axios from "axios";
+import { BASE_URL } from "@/api/auth";
+import toast, { Toaster } from "react-hot-toast";
+import Cookies from "js-cookie";
+
 type FormValues = {
   password: string;
   confirmPassword: string;
@@ -41,9 +46,22 @@ export default function ResetPasswordPage() {
   });
 
   const onSubmit = async (data: FormValues) => {
-    // Simulate API call
-    await new Promise((res) => setTimeout(res, 2000));
-    setIsSuccess(true);
+    const token = Cookies.get("accessToken")
+
+    try {
+      const res = await axios.post(`${BASE_URL}/api/v1/auth/reset-password`, {
+        token,
+        password: data.password,
+      });
+
+      if (res?.data && res?.data?.success) {
+        toast.success(res?.data?.message || "Success!");
+        setIsSuccess(true);
+      }
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || "Error occurred");
+    } finally {
+    }
   };
 
   const password = watch("password");
@@ -197,6 +215,7 @@ export default function ResetPasswordPage() {
           </CardContent>
         </Card>
       </motion.div>
+      <Toaster />
     </div>
   );
 }

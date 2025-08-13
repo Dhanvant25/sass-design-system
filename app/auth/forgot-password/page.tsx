@@ -22,6 +22,10 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { forgotPasswordSchema } from "@/schema/auth/forgotPassword";
 
+import axios from "axios";
+import { BASE_URL } from "@/api/auth";
+import toast, { Toaster } from "react-hot-toast";
+
 type ForgotPasswordFormData = {
   email: string;
 };
@@ -41,13 +45,26 @@ export default function ForgotPasswordPage() {
     },
   });
 
-  const onSubmit = (data: ForgotPasswordFormData) => {
+  const onSubmit = async (data: ForgotPasswordFormData) => {
     setIsLoading(true);
 
-    setTimeout(() => {
+    try {
+      const res = await axios.post(`${BASE_URL}/api/v1/auth/forgot-password`, {
+        email: data.email,
+      });
+
+      if (res?.data && res?.data?.success) {
+        toast.success(res?.data?.message || "Success!");
+        setTimeout(() => {
+          setIsSubmitted(true);
+        }, 1000);
+      }
+    } catch (error: any) {
+      console.error("Forgot password", error);
+      toast.error(error?.response?.data?.message || "Error occurred");
+    } finally {
       setIsLoading(false);
-      setIsSubmitted(true);
-    }, 2000);
+    }
   };
 
   if (isSubmitted) {
@@ -162,6 +179,7 @@ export default function ForgotPasswordPage() {
           </CardContent>
         </Card>
       </motion.div>
+      <Toaster />
     </div>
   );
 }
