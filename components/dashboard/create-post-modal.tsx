@@ -72,9 +72,10 @@ const aiSuggestions = [
 interface FormValues {
   postTitle: string;
   postContent: string;
-  scheduledDate?: string | null;
-  scheduledTime?: string | null;
+  scheduledDate: string;
+  scheduledTime: string;
   selectedPlatforms?: string[];
+  mediaFile: File;
 }
 
 interface CreatePostModalProps {
@@ -122,6 +123,7 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
     const file = e.target.files?.[0];
     if (file) {
       setSelectedMedia(file);
+       setValue("mediaFile", file, { shouldValidate: true });
     }
   };
 
@@ -285,7 +287,12 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
                     </Button>
                   </div>
                 )}
-              </div>
+                    </div>
+                {errors.mediaFile && (
+                  <p className="text-sm text-red-500">
+                    {errors.mediaFile.message}
+                  </p>
+                )}
             </div>
 
             {/* Scheduling */}
@@ -295,22 +302,22 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
                 <div>
                   <Label className="text-xs text-muted-foreground">Date</Label>
                   <Input type="date" {...register("scheduledDate")} />
+                  {errors.scheduledDate && (
+                    <p className="text-sm text-red-500">
+                      {errors.scheduledDate.message}
+                    </p>
+                  )}
                 </div>
                 <div>
                   <Label className="text-xs text-muted-foreground">Time</Label>
                   <Input type="time" {...register("scheduledTime")} />
+                  {errors.scheduledTime && (
+                    <p className="text-sm text-red-500">
+                      {errors.scheduledTime.message}
+                    </p>
+                  )}
                 </div>
               </div>
-              {errors.scheduledDate && (
-                <p className="text-sm text-red-500">
-                  {errors.scheduledDate.message}
-                </p>
-              )}
-              {errors.scheduledTime && (
-                <p className="text-sm text-red-500">
-                  {errors.scheduledTime.message}
-                </p>
-              )}
             </div>
           </div>
 
