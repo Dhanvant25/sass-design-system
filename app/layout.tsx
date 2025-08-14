@@ -39,18 +39,18 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="Social Manager" />
       </head>
-      <body className={cn(inter.variable, "font-sans antialiased")}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <AuthProvider>
+      <AuthProvider>
+        <body className={cn(inter.variable, "font-sans antialiased")}>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
             <div className="min-h-screen bg-background">{children}</div>
-          </AuthProvider>
-        </ThemeProvider>
-      </body>
+          </ThemeProvider>
+        </body>
+      </AuthProvider>
     </html>
   );
 }

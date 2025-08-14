@@ -4,6 +4,7 @@ import type React from "react";
 import { redirect } from "next/navigation";
 import { AdminSidebar } from "@/components/admin/sidebar";
 import { AdminHeader } from "@/components/admin/header";
+import { AuthProvider } from "@/store/AuthContext";
 
 // Mock auth check - replace with real authentication
 async function checkAdminAuth() {
@@ -22,12 +23,14 @@ export default async function AdminLayout({
   await checkAdminAuth();
 
   return (
-    <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
-      <AdminSidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <AdminHeader />
-        <main className="flex-1 overflow-y-auto p-6">{children}</main>
+    <AuthProvider>
+      <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
+        <AdminSidebar />
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <AdminHeader />
+          <main className="flex-1 overflow-y-auto p-6">{children}</main>
+        </div>
       </div>
-    </div>
+    </AuthProvider>
   );
 }

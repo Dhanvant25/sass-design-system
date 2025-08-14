@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -32,6 +32,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { loginSchema } from "@/schema/auth/loginSchema";
 import { login } from "@/api/auth";
 import { useAuth } from "@/store/AuthContext";
+import toast, { Toaster } from "react-hot-toast";
 
 type LoginFormData = {
   email: string;
@@ -42,7 +43,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [serverError, setServerError] = useState("");
-  const { setUserData } = useAuth();
+  const { userData, setUserData } = useAuth();
 
   const {
     register,
@@ -60,15 +61,22 @@ export default function LoginPage() {
       const user = await login(data);
       if (user) {
         console.log("Logged in:", user);
-        // setUserData(user);
+        setUserData(user);
+        console.log("LOGIN PAGE userData", userData);
+
         // window.location.href = "/onboarding";
+        toast.success("Login successful");
       }
-    } catch (err) {
-      console.error("Login error", err);
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "Error occurred");
     } finally {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    console.log("userData changed:", userData);
+  }, [userData]);
 
   const handleOAuthLogin = (provider: string) => {
     setIsLoading(true);
@@ -227,6 +235,7 @@ export default function LoginPage() {
           </CardContent>
         </Card>
       </motion.div>
+      <Toaster />
     </div>
   );
 }

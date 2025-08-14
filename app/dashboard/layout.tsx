@@ -6,6 +6,7 @@ import { DashboardSidebar } from "@/components/dashboard/sidebar";
 import { DashboardHeader } from "@/components/dashboard/header";
 import { BottomNavigation } from "@/components/mobile/bottom-navigation";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { AuthProvider } from "@/store/AuthContext";
 
 export default function DashboardLayout({
   children,
@@ -16,27 +17,31 @@ export default function DashboardLayout({
 
   if (isMobile) {
     return (
-      <SidebarProvider>
-        <div className="min-h-screen bg-background !w-full">
-          <div className="pb-20">
-            {" "}
-            {/* Add padding for bottom navigation */}
-            <DashboardHeader />
-            <main className="container mx-auto px-4 py-6">{children}</main>
+      <AuthProvider>
+        <SidebarProvider>
+          <div className="min-h-screen bg-background !w-full">
+            <div className="pb-20">
+              {" "}
+              {/* Add padding for bottom navigation */}
+              <DashboardHeader />
+              <main className="container mx-auto px-4 py-6">{children}</main>
+            </div>
+            <BottomNavigation userType="individual" />
           </div>
-          <BottomNavigation userType="individual" />
-        </div>
-      </SidebarProvider>
+        </SidebarProvider>
+      </AuthProvider>
     );
   }
 
   return (
-    <SidebarProvider>
-      <DashboardSidebar />
-      <SidebarInset>
-        <DashboardHeader />
-        <main className="flex-1 p-6">{children}</main>
-      </SidebarInset>
-    </SidebarProvider>
+    <AuthProvider>
+      <SidebarProvider>
+        <DashboardSidebar />
+        <SidebarInset>
+          <DashboardHeader />
+          <main className="flex-1 p-6">{children}</main>
+        </SidebarInset>
+      </SidebarProvider>
+    </AuthProvider>
   );
 }
