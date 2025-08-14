@@ -9,6 +9,10 @@ import { BottomNavigation } from "@/components/mobile/bottom-navigation";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { AuthProvider } from "@/store/AuthContext";
 
+import { useAuth } from "@/store/AuthContext";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+
 export default function ClientLayout({
   children,
   params,
@@ -17,6 +21,19 @@ export default function ClientLayout({
   params: { clientId: string };
 }) {
   const isMobile = useIsMobile();
+
+  const { isAuthenticated } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.replace("/auth/login");
+    }
+  }, [isAuthenticated, router]);
+
+  if (!isAuthenticated) {
+    return null;
+  }
 
   if (isMobile) {
     return (

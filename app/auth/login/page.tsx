@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -33,6 +33,7 @@ import { loginSchema } from "@/schema/auth/loginSchema";
 import { login } from "@/api/auth";
 import { useAuth } from "@/store/AuthContext";
 import toast, { Toaster } from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
 type LoginFormData = {
   email: string;
@@ -43,7 +44,8 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [serverError, setServerError] = useState("");
-  const { userData, setUserData } = useAuth();
+  const { setUserData, setIsAuthenticated } = useAuth();
+  const router = useRouter();
 
   const {
     register,
@@ -62,9 +64,11 @@ export default function LoginPage() {
       if (user) {
         console.log("Logged in:", user);
         setUserData(user);
-        console.log("LOGIN PAGE userData", userData);
+        setIsAuthenticated(true);
 
+        router.push("/admin");
         // window.location.href = "/onboarding";
+
         toast.success("Login successful");
       }
     } catch (err: any) {
@@ -73,10 +77,6 @@ export default function LoginPage() {
       setIsLoading(false);
     }
   };
-
-  useEffect(() => {
-    console.log("userData changed:", userData);
-  }, [userData]);
 
   const handleOAuthLogin = (provider: string) => {
     setIsLoading(true);
