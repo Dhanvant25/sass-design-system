@@ -75,9 +75,11 @@ export default function OnboardingPage() {
                   Step {currentStep} of {steps.length}
                 </div>
               </div>
-              <Button variant="ghost" onClick={handleSkip}>
-                Skip Setup
-              </Button>
+              {currentStep == 4 && (
+                <Button variant="ghost" onClick={handleSkip}>
+                  Skip Setup
+                </Button>
+              )}
             </div>
 
             {/* Progress Bar */}

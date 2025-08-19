@@ -66,12 +66,18 @@ export default function LoginPage() {
         setUserData(user);
         setIsAuthenticated(true);
 
-        if (user.role === "super_admin") {
-          router.push("/admin");
-        } else if (user.role === "agency") {
-          router.push("/agency");
-        } else if (user.role === "user") {
-          router.push("/dashboard");
+        switch (user.role) {
+          case "super_admin":
+            router.push("/admin");
+            break;
+
+          case "agency_admin":
+            router.push(user.isOnboardingCompleted ? "/agency" : "/onboarding");
+            break;
+
+          case "user":
+            router.push("/dashboard");
+            break;
         }
 
         // router.push("/admin");

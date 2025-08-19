@@ -1,51 +1,3 @@
-// "use client";
-
-// import React, { createContext, useState, useContext, useEffect } from "react";
-// import Cookies from "js-cookie";
-
-// const AuthContext = createContext();
-
-// export const AuthProvider = ({ children }) => {
-//   const [userData, setUserData] = useState(null);
-//   const [isAuthenticated, setIsAuthenticated] = useState(
-//     !!Cookies.get("accessToken")
-//   );
-
-//   console.log(
-//     "CONTEXT IS AUTH VARIABLE",
-//     isAuthenticated,
-//     Cookies.get("accessToken")
-//   );
-
-//   useEffect(() => {
-//     const storedUser = localStorage.getItem("userData");
-//     if (storedUser) {
-//       setUserData(JSON.parse(storedUser));
-//       setIsAuthenticated(true);
-//     }
-//   }, []);
-
-//   useEffect(() => {
-//     if (userData) {
-//       localStorage.setItem("userData", JSON.stringify(userData));
-//       setIsAuthenticated(true);
-//     } else {
-//       // localStorage.removeItem("userData");
-//       // setIsAuthenticated(false);
-//     }
-//   }, [userData]);
-
-//   return (
-//     <AuthContext.Provider
-//       value={{ userData, setUserData, isAuthenticated, setIsAuthenticated }}
-//     >
-//       {children}
-//     </AuthContext.Provider>
-//   );
-// };
-
-// export const useAuth = () => useContext(AuthContext);
-
 "use client";
 
 import React, { createContext, useState, useContext, useEffect } from "react";
@@ -87,7 +39,7 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     if (isAuthenticated && authRoutes.includes(pathname)) {
-      router.replace("/admin");
+      // router.replace("/admin");
     }
   }, [isAuthenticated, pathname, router]);
 

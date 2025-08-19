@@ -205,8 +205,6 @@ export function UserManagement() {
         `/api/users?page=${cp}&limit=${pagination.limit}&search=${search}&isActive=${status}`
       );
 
-      console.log("RESPONSE", res);
-
       if (error) {
         console.error("API ERROR", error);
         return;
