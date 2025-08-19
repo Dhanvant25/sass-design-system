@@ -80,6 +80,8 @@ export default function LoginPage() {
             break;
         }
 
+        console.log("user.isOnboardingCompleted", user.isOnboardingCompleted);
+
         // router.push("/admin");
         // window.location.href = "/onboarding";
 

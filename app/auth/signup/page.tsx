@@ -41,13 +41,13 @@ import { signupSchema } from "@/schema/auth/signupSchema";
 import { signup } from "@/api/auth";
 import { useAuth } from "@/store/AuthContext";
 import toast, { Toaster } from "react-hot-toast";
-import {} from "react-hook-form";
+import { useRouter } from "next/navigation";
 
 type SignUpFormData = {
   firstName: string;
   lastName: string;
   email: string;
-  userType: string;
+  userType: "individual" | "agency";
   password: string;
   confirmPassword: string;
   acceptTerms: boolean;
@@ -58,6 +58,7 @@ export default function SignUpPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { setUserData } = useAuth();
+  const router = useRouter();
 
   const {
     register,
@@ -100,6 +101,20 @@ export default function SignUpPage() {
         toast.success(
           "Registration successful. Please check your email to verify your account."
         );
+
+        switch (user.role) {
+          case "super_admin":
+            router.push("/admin");
+            break;
+
+          case "agency_admin":
+            router.push(user.isOnboardingCompleted ? "/agency" : "/onboarding");
+            break;
+
+          case "user":
+            router.push("/dashboard");
+            break;
+        }
       }
     } catch (err: any) {
       console.error("Register error", err);

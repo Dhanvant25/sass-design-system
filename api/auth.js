@@ -1,7 +1,8 @@
 import axios from "axios";
 import Cookies from "js-cookie";
 
-export const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://192.168.1.40:3000";
+export const BASE_URL =
+  process.env.NEXT_PUBLIC_BASE_URL || "http://192.168.1.40:3000";
 
 export const login = async ({ email, password }) => {
   const res = await axios.post(`${BASE_URL}/api/v1/auth/login`, {
@@ -16,12 +17,21 @@ export const login = async ({ email, password }) => {
   return user;
 };
 
-export const signup = async ({ firstName, lastName, email, password }) => {
+export const signup = async ({
+  firstName,
+  lastName,
+  email,
+  password,
+  userType,
+  confirmPassword,
+}) => {
   const payload = {
     firstName,
     lastName,
     email,
     password,
+    userType,
+    confirmPassword,
   };
 
   const res = await axios.post(`${BASE_URL}/api/v1/auth/register`, payload);
