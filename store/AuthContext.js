@@ -46,7 +46,6 @@
 
 // export const useAuth = () => useContext(AuthContext);
 
-
 "use client";
 
 import React, { createContext, useState, useContext, useEffect } from "react";

@@ -27,18 +27,27 @@ import {
   ArrowLeft,
   Check,
 } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { signupSchema } from "@/schema/auth/signupSchema";
 import { signup } from "@/api/auth";
 import { useAuth } from "@/store/AuthContext";
 import toast, { Toaster } from "react-hot-toast";
+import {} from "react-hook-form";
 
 type SignUpFormData = {
   firstName: string;
   lastName: string;
   email: string;
+  userType: string;
   password: string;
   confirmPassword: string;
   acceptTerms: boolean;
@@ -54,6 +63,7 @@ export default function SignUpPage() {
     register,
     handleSubmit,
     formState: { errors },
+    control,
     trigger,
     watch,
     setValue,
@@ -63,6 +73,7 @@ export default function SignUpPage() {
       firstName: "",
       lastName: "",
       email: "",
+      userType: "individual",
       password: "",
       confirmPassword: "",
       acceptTerms: false,
@@ -86,7 +97,9 @@ export default function SignUpPage() {
       if (user) {
         console.log("Logged in:", user);
         setUserData(user);
-        toast.success("Registration successful. Please check your email to verify your account.");
+        toast.success(
+          "Registration successful. Please check your email to verify your account."
+        );
       }
     } catch (err: any) {
       console.error("Register error", err);
@@ -215,6 +228,30 @@ export default function SignUpPage() {
                 </div>
                 {errors.email && (
                   <p className="text-sm text-red-500">{errors.email.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="user-type">User Type</Label>
+                <Controller
+                  name="userType"
+                  control={control}
+                  render={({ field }) => (
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select user type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="individual">Individual</SelectItem>
+                        <SelectItem value="agency">Agency</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+                {errors.userType && (
+                  <p className="text-red-500 text-sm">
+                    {errors.userType.message}
+                  </p>
                 )}
               </div>
 

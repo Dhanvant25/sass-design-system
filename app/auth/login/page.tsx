@@ -66,7 +66,15 @@ export default function LoginPage() {
         setUserData(user);
         setIsAuthenticated(true);
 
-        router.push("/admin");
+        if (user.role === "super_admin") {
+          router.push("/admin");
+        } else if (user.role === "agency") {
+          router.push("/agency");
+        } else if (user.role === "user") {
+          router.push("/dashboard");
+        }
+
+        // router.push("/admin");
         // window.location.href = "/onboarding";
 
         toast.success("Login successful");

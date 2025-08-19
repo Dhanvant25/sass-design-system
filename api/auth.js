@@ -1,7 +1,7 @@
 import axios from "axios";
 import Cookies from "js-cookie";
 
-export const BASE_URL = process.env.BASE_URL || "http://localhost:5000";
+export const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://192.168.1.40:3000";
 
 export const login = async ({ email, password }) => {
   const res = await axios.post(`${BASE_URL}/api/v1/auth/login`, {

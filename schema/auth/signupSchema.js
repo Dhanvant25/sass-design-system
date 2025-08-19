@@ -10,6 +10,7 @@ export const signupSchema = yup.object().shape({
     .required("Last name is required")
     .matches(/^[A-Za-z]+$/, "Last name must contain only letters"),
   email: yup.string().email("Invalid email").required("Email is required"),
+  userType: yup.string().oneOf(["individual", "agency"]).required(),
   password: yup
     .string()
     .required("Password is required")
