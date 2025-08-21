@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   Save,
@@ -37,6 +37,9 @@ import {
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { agencyInfoSchema } from "@/schema/agency/agencyInfoSchema";
+import { useAuth } from "@/store/AuthContext";
+import { useGet, usePut } from "@/api/apiMethode";
+import toast, { Toaster } from "react-hot-toast";
 
 // Mock agency branding
 const agencyBranding = {
@@ -88,6 +91,8 @@ export function AgencySettings() {
     weeklyReports: true,
     systemUpdates: false,
   });
+  const [isLoading, setIsLoading] = useState(false);
+  const { userData } = useAuth();
 
   const handleNotificationChange = (key: string, value: boolean) => {
     setNotifications((prev) => ({ ...prev, [key]: value }));
@@ -96,22 +101,69 @@ export function AgencySettings() {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<AgencyInfoFormData>({
     resolver: yupResolver(agencyInfoSchema),
     defaultValues: {
-      name: "Digital Marketing Pro",
-      email: "contact@digitalmarketingpro.com",
-      phone: "+1 (555) 123-4567",
-      website: "https://digitalmarketingpro.com",
-      address: "123 Business St, San Francisco, CA 94105",
+      name: "",
+      email: "",
+      phone: "",
+      website: "",
+      address: "",
     },
   });
 
-  const onSubmit = (data: AgencyInfoFormData) => {
+  const onSubmit = async (data: AgencyInfoFormData) => {
     console.log("Agency Info:", data);
-    // Perform save logic here
+
+    const payload = {
+      name: data.name,
+    };
+
+    try {
+      setIsLoading(true);
+      const { res, error } = await usePut(
+        `/api/agencies/${userData?.id}`,
+        payload
+      );
+
+      if (error) {
+        console.error("API ERROR", error);
+        toast.error(error?.message || "Error occurred");
+        return;
+      }
+
+      if (res?.success) {
+        console.log("respose", res);
+        toast.success(res?.message || "Agency updated successfully");
+      }
+    } catch (error) {
+      console.error("Unexpected error while fetching users:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
+
+  const getAgencyById = async () => {
+    console.log("Agency Id", userData, userData?.id);
+    if (userData?.id || true) {
+      const { res, error } = await useGet(`/api/agencies/${userData?.id}`);
+
+      if (res?.success) {
+        console.log("respose", res);
+        setValue(`name`, res?.data?.name);
+        setValue(`email`, res?.data?.email);
+        setValue(`phone`, res?.data?.phone);
+        setValue(`website`, res?.data?.website);
+        setValue(`address`, res?.data?.address);
+      }
+    }
+  };
+
+  useEffect(() => {
+    getAgencyById();
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -238,9 +290,10 @@ export function AgencySettings() {
                     type="submit"
                     style={{ backgroundColor: agencyBranding.primaryColor }}
                     className="text-white hover:opacity-90"
+                    disabled={isLoading}
                   >
                     <Save className="w-4 h-4 mr-2" />
-                    Save Changes
+                    {isLoading ? "Saving..." : "Save Changes"}
                   </Button>
                 </CardContent>
               </Card>
@@ -567,6 +620,7 @@ export function AgencySettings() {
           </TabsContent>
         </Tabs>
       </motion.div>
+      <Toaster />
     </div>
   );
 }
