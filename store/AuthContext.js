@@ -1,26 +1,12 @@
 "use client";
 
-import React, { createContext, useState, useContext, useEffect } from "react";
-import Cookies from "js-cookie";
-import { useRouter, usePathname } from "next/navigation";
+import { createContext, useContext, useEffect, useState } from "react";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [userData, setUserData] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(
-    !!Cookies.get("accessToken")
-  );
-
-  const router = useRouter();
-  const pathname = usePathname();
-
-  const authRoutes = [
-    "/auth/login",
-    "/auth/signup",
-    "/auth/reset-password",
-    "/auth/forgot-password",
-  ];
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("userData");
@@ -34,18 +20,27 @@ export const AuthProvider = ({ children }) => {
     if (userData) {
       localStorage.setItem("userData", JSON.stringify(userData));
       setIsAuthenticated(true);
+    } else {
+      localStorage.removeItem("userData");
+      setIsAuthenticated(false);
     }
   }, [userData]);
 
-  useEffect(() => {
-    if (isAuthenticated && authRoutes.includes(pathname)) {
-      // router.replace("/admin");
-    }
-  }, [isAuthenticated, pathname, router]);
+  const clearAuth = () => {
+    setUserData(null);
+    setIsAuthenticated(false);
+    localStorage.removeItem("userData");
+  };
 
   return (
     <AuthContext.Provider
-      value={{ userData, setUserData, isAuthenticated, setIsAuthenticated }}
+      value={{
+        userData,
+        setUserData,
+        isAuthenticated,
+        setIsAuthenticated,
+        clearAuth,
+      }}
     >
       {children}
     </AuthContext.Provider>

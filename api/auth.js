@@ -13,6 +13,7 @@ export const login = async ({ email, password }) => {
 
   Cookies.set("accessToken", tokens.accessToken);
   Cookies.set("refreshToken", tokens.refreshToken);
+  Cookies.set("userData", JSON.stringify(user));
 
   return user;
 };
@@ -40,6 +41,7 @@ export const signup = async ({
 
   Cookies.set("accessToken", tokens.accessToken);
   Cookies.set("refreshToken", tokens.refreshToken);
+  Cookies.set("userData", JSON.stringify(user));
 
   return user;
 };
@@ -47,6 +49,7 @@ export const signup = async ({
 export const logout = () => {
   Cookies.remove("accessToken");
   Cookies.remove("refreshToken");
+  Cookies.remove("userData");
   localStorage.removeItem("userData");
 
   if (typeof window !== "undefined") {
