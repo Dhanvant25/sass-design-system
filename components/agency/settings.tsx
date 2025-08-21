@@ -115,8 +115,6 @@ export function AgencySettings() {
   });
 
   const onSubmit = async (data: AgencyInfoFormData) => {
-    console.log("Agency Info:", data);
-
     const payload = {
       name: data.name,
     };
@@ -146,8 +144,7 @@ export function AgencySettings() {
   };
 
   const getAgencyById = async () => {
-    console.log("Agency Id", userData, userData?.id);
-    if (userData?.id || true) {
+    if (userData?.id) {
       const { res, error } = await useGet(`/api/agencies/${userData?.id}`);
 
       if (res?.success) {
