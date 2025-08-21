@@ -62,7 +62,6 @@ export default function LoginPage() {
     try {
       const user = await login(data);
       if (user) {
-        console.log("Logged in:", user);
         setUserData(user);
         setIsAuthenticated(true);
 
@@ -79,11 +78,6 @@ export default function LoginPage() {
             router.push("/dashboard");
             break;
         }
-
-        console.log("user.isOnboardingCompleted", user.isOnboardingCompleted);
-
-        // router.push("/admin");
-        // window.location.href = "/onboarding";
 
         toast.success("Login successful");
       }
