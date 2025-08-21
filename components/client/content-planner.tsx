@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { CalendarIcon, Plus, Search, MoreHorizontal, Edit, Trash2, Copy, Eye } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -52,9 +52,20 @@ const scheduledPosts = [
 ]
 
 export function ClientContentPlanner({ clientId }: ClientContentPlannerProps) {
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date())
+  const [isClient, setIsClient] = useState(false)
+  const [date, setDate] = useState<Date | undefined>(undefined)
   const [viewMode, setViewMode] = useState<"calendar" | "list">("calendar")
   const [searchQuery, setSearchQuery] = useState("")
+
+  useEffect(() => {
+    setIsClient(true)
+    setDate(new Date())
+  }, [])
+
+  // Don't render anything on the server to prevent hydration mismatch
+  if (!isClient) {
+    return null
+  }
 
   return (
     <div className="space-y-6">
@@ -121,8 +132,8 @@ export function ClientContentPlanner({ clientId }: ClientContentPlannerProps) {
               <CardContent>
                 <Calendar
                   mode="single"
-                  selected={selectedDate}
-                  onSelect={setSelectedDate}
+                  selected={date}
+                  onSelect={setDate}
                   className="rounded-md border"
                 />
               </CardContent>
@@ -138,7 +149,7 @@ export function ClientContentPlanner({ clientId }: ClientContentPlannerProps) {
             <Card className="border-border/50">
               <CardHeader>
                 <CardTitle className="text-lg">
-                  {selectedDate ? selectedDate.toDateString() : "Select a date"}
+                  {date ? date.toDateString() : "Select a date"}
                 </CardTitle>
                 <CardDescription>{scheduledPosts.length} posts scheduled</CardDescription>
               </CardHeader>
@@ -164,7 +175,14 @@ export function ClientContentPlanner({ clientId }: ClientContentPlannerProps) {
                       </div>
                       <p className="text-sm text-muted-foreground line-clamp-2 mb-2">{post.content}</p>
                       <div className="flex items-center justify-between">
-                        <p className="text-xs text-muted-foreground">{new Date(post.scheduledTime).toLocaleString()}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {post.scheduledTime ? new Date(post.scheduledTime).toLocaleString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          }) : ''}
+                        </p>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="sm">
@@ -233,7 +251,14 @@ export function ClientContentPlanner({ clientId }: ClientContentPlannerProps) {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4 text-xs text-muted-foreground">
                         <span>{post.platform}</span>
-                        <span>{new Date(post.scheduledTime).toLocaleString()}</span>
+                        <span>
+                          {post.scheduledTime ? new Date(post.scheduledTime).toLocaleString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          }) : ''}
+                        </span>
                       </div>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>

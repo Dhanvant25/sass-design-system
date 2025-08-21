@@ -1,7 +1,6 @@
 "use client";
 
-import type React from "react";
-
+import * as React from "react";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { ClientSidebar } from "@/components/client/sidebar";
 import { ClientHeader } from "@/components/client/header";
@@ -9,13 +8,13 @@ import { BottomNavigation } from "@/components/mobile/bottom-navigation";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { AuthProvider } from "@/store/AuthContext";
 
-export default function ClientLayout({
-  children,
-  params,
-}: {
+interface ClientLayoutProps {
   children: React.ReactNode;
-  params: { clientId: string };
-}) {
+  params: Promise<{ clientId: string }>;
+}
+
+export default function ClientLayout({ children, params }: ClientLayoutProps) {
+  const { clientId } = React.use(params);
   const isMobile = useIsMobile();
 
   if (isMobile) {
@@ -24,10 +23,10 @@ export default function ClientLayout({
         <SidebarProvider>
           <div className="min-h-screen bg-background !w-full">
             <div className="pb-20">
-              <ClientHeader clientId={params.clientId} />
+              <ClientHeader clientId={clientId} />
               <main className="container mx-auto px-4 py-6">{children}</main>
             </div>
-            <BottomNavigation userType="client" clientId={params.clientId} />
+            <BottomNavigation userType="client" clientId={clientId} />
           </div>
         </SidebarProvider>
       </AuthProvider>
@@ -37,9 +36,9 @@ export default function ClientLayout({
   return (
     <AuthProvider>
       <SidebarProvider>
-        <ClientSidebar clientId={params.clientId} />
+        <ClientSidebar clientId={clientId} />
         <SidebarInset>
-          <ClientHeader clientId={params.clientId} />
+          <ClientHeader clientId={clientId} />
           <main className="flex-1 p-6">{children}</main>
         </SidebarInset>
       </SidebarProvider>

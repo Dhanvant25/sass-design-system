@@ -1,9 +1,13 @@
-import { ClientAssetLibrary } from "@/components/client/asset-library"
+"use client";
+
+import * as React from "react";
+import { ClientAssetLibrary } from "@/components/client/asset-library";
 
 interface ClientAssetsPageProps {
-  params: { clientId: string }
+  params: Promise<{ clientId: string }>;
 }
 
 export default function ClientAssetsPage({ params }: ClientAssetsPageProps) {
-  return <ClientAssetLibrary clientId={params.clientId} />
+  const { clientId } = React.use(params);
+  return <ClientAssetLibrary clientId={clientId} />;
 }

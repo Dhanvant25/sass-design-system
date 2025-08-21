@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { motion } from "framer-motion"
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import {
   Upload,
   Search,
@@ -17,21 +17,26 @@ import {
   ImageIcon,
   Video,
   FileText,
-} from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+} from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface ClientAssetLibraryProps {
-  clientId: string
+  clientId: string;
 }
 
 // Mock agency branding
 const agencyBranding = {
   primaryColor: "#6366F1",
-}
+};
 
 const assets = [
   {
@@ -70,54 +75,72 @@ const assets = [
     url: "/placeholder.svg?height=300&width=200&text=Brand+Guidelines",
     thumbnail: "/placeholder.svg?height=150&width=100&text=PDF",
   },
-]
+];
 
 const folders = [
   { name: "All Assets", count: assets.length },
   { name: "Summer Campaign 2024", count: 1 },
   { name: "Product Assets", count: 1 },
   { name: "Brand Assets", count: 1 },
-]
+];
 
 export function ClientAssetLibrary({ clientId }: ClientAssetLibraryProps) {
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
-  const [selectedFolder, setSelectedFolder] = useState("All Assets")
-  const [searchQuery, setSearchQuery] = useState("")
+  const [isClient, setIsClient] = useState(false);
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [selectedFolder, setSelectedFolder] = useState("All Assets");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const getFileIcon = (type: string) => {
     switch (type) {
       case "image":
-        return ImageIcon
+        return ImageIcon;
       case "video":
-        return Video
+        return Video;
       case "document":
-        return FileText
+        return FileText;
       default:
-        return FileText
+        return FileText;
     }
-  }
+  };
 
   const getFileTypeColor = (type: string) => {
     switch (type) {
       case "image":
-        return "text-green-500"
+        return "text-green-500";
       case "video":
-        return "text-blue-500"
+        return "text-blue-500";
       case "document":
-        return "text-red-500"
+        return "text-red-500";
       default:
-        return "text-gray-500"
+        return "text-gray-500";
     }
+  };
+
+  // Don't render anything on the server to prevent hydration mismatch
+  if (!isClient) {
+    return null;
   }
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Asset Library</h1>
-            <p className="text-muted-foreground">Organize and manage all your brand assets</p>
+            <h1 className="text-3xl font-bold text-foreground">
+              Asset Library
+            </h1>
+            <p className="text-muted-foreground">
+              Organize and manage all your brand assets
+            </p>
           </div>
           <Button
             style={{ backgroundColor: agencyBranding.primaryColor }}
@@ -146,7 +169,9 @@ export function ClientAssetLibrary({ clientId }: ClientAssetLibraryProps) {
                   key={folder.name}
                   onClick={() => setSelectedFolder(folder.name)}
                   className={`w-full flex items-center justify-between p-2 rounded-lg text-left transition-colors ${
-                    selectedFolder === folder.name ? "bg-primary/10 text-primary" : "hover:bg-muted"
+                    selectedFolder === folder.name
+                      ? "bg-primary/10 text-primary"
+                      : "hover:bg-muted"
                   }`}
                 >
                   <div className="flex items-center gap-2">
@@ -212,7 +237,7 @@ export function ClientAssetLibrary({ clientId }: ClientAssetLibraryProps) {
             {viewMode === "grid" ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {assets.map((asset, index) => {
-                  const FileIcon = getFileIcon(asset.type)
+                  const FileIcon = getFileIcon(asset.type);
                   return (
                     <motion.div
                       key={asset.id}
@@ -239,20 +264,30 @@ export function ClientAssetLibrary({ clientId }: ClientAssetLibraryProps) {
                               </div>
                             </div>
                             <div
-                              className={`absolute top-2 left-2 w-6 h-6 rounded bg-background/90 flex items-center justify-center ${getFileTypeColor(asset.type)}`}
+                              className={`absolute top-2 left-2 w-6 h-6 rounded bg-background/90 flex items-center justify-center ${getFileTypeColor(
+                                asset.type
+                              )}`}
                             >
                               <FileIcon className="w-3 h-3" />
                             </div>
                           </div>
                           <div className="space-y-2">
-                            <h3 className="font-medium text-sm truncate">{asset.name}</h3>
+                            <h3 className="font-medium text-sm truncate">
+                              {asset.name}
+                            </h3>
                             <div className="flex items-center justify-between text-xs text-muted-foreground">
                               <span>{asset.size}</span>
-                              {asset.dimensions && <span>{asset.dimensions}</span>}
+                              {asset.dimensions && (
+                                <span>{asset.dimensions}</span>
+                              )}
                             </div>
                             <div className="flex flex-wrap gap-1">
                               {asset.tags.slice(0, 2).map((tag) => (
-                                <Badge key={tag} variant="secondary" className="text-xs">
+                                <Badge
+                                  key={tag}
+                                  variant="secondary"
+                                  className="text-xs"
+                                >
                                   {tag}
                                 </Badge>
                               ))}
@@ -300,7 +335,7 @@ export function ClientAssetLibrary({ clientId }: ClientAssetLibraryProps) {
                         </CardContent>
                       </Card>
                     </motion.div>
-                  )
+                  );
                 })}
               </div>
             ) : (
@@ -308,7 +343,7 @@ export function ClientAssetLibrary({ clientId }: ClientAssetLibraryProps) {
                 <CardContent className="p-0">
                   <div className="space-y-0">
                     {assets.map((asset, index) => {
-                      const FileIcon = getFileIcon(asset.type)
+                      const FileIcon = getFileIcon(asset.type);
                       return (
                         <motion.div
                           key={asset.id}
@@ -324,18 +359,34 @@ export function ClientAssetLibrary({ clientId }: ClientAssetLibraryProps) {
                           />
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1">
-                              <FileIcon className={`w-4 h-4 ${getFileTypeColor(asset.type)}`} />
-                              <h3 className="font-medium text-sm truncate">{asset.name}</h3>
+                              <FileIcon
+                                className={`w-4 h-4 ${getFileTypeColor(
+                                  asset.type
+                                )}`}
+                              />
+                              <h3 className="font-medium text-sm truncate">
+                                {asset.name}
+                              </h3>
                             </div>
                             <div className="flex items-center gap-4 text-xs text-muted-foreground">
                               <span>{asset.size}</span>
-                              {asset.dimensions && <span>{asset.dimensions}</span>}
-                              <span>{new Date(asset.uploadedAt).toLocaleDateString()}</span>
+                              {asset.dimensions && (
+                                <span>{asset.dimensions}</span>
+                              )}
+                              <span>
+                                {new Date(
+                                  asset.uploadedAt
+                                ).toLocaleDateString()}
+                              </span>
                             </div>
                           </div>
                           <div className="flex flex-wrap gap-1">
                             {asset.tags.slice(0, 3).map((tag) => (
-                              <Badge key={tag} variant="secondary" className="text-xs">
+                              <Badge
+                                key={tag}
+                                variant="secondary"
+                                className="text-xs"
+                              >
                                 {tag}
                               </Badge>
                             ))}
@@ -370,7 +421,7 @@ export function ClientAssetLibrary({ clientId }: ClientAssetLibraryProps) {
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </motion.div>
-                      )
+                      );
                     })}
                   </div>
                 </CardContent>
@@ -380,5 +431,5 @@ export function ClientAssetLibrary({ clientId }: ClientAssetLibraryProps) {
         </div>
       </div>
     </div>
-  )
+  );
 }

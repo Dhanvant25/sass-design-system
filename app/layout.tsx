@@ -15,11 +15,20 @@ export const metadata: Metadata = {
   title: "Automated Social Content & Brand Asset Manager",
   description:
     "A comprehensive social media management platform with AI-powered content creation",
-  viewport:
-    "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no",
-  themeColor: "#6366F1",
-  manifest: "/manifest.json",
   generator: "v0.dev",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Social Manager",
+  },
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  themeColor: "#6366F1",
 };
 
 export default function RootLayout({
@@ -30,17 +39,13 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <meta
-          name="viewport"
-          content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
-        />
-        <meta name="theme-color" content="#6366F1" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="Social Manager" />
+        <meta name="mobile-web-app-capable" content="yes" />
       </head>
       <AuthProvider>
-        <body className={cn(inter.variable, "font-sans antialiased")}>
+        <body
+          className={cn(inter.variable, "font-sans antialiased")}
+          suppressHydrationWarning
+        >
           <ThemeProvider
             attribute="class"
             defaultTheme="system"

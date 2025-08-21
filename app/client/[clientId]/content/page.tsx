@@ -1,9 +1,13 @@
-import { ClientContentPlanner } from "@/components/client/content-planner"
+"use client";
+
+import * as React from "react";
+import { ClientContentPlanner } from "@/components/client/content-planner";
 
 interface ClientContentPageProps {
-  params: { clientId: string }
+  params: Promise<{ clientId: string }>;
 }
 
 export default function ClientContentPage({ params }: ClientContentPageProps) {
-  return <ClientContentPlanner clientId={params.clientId} />
+  const { clientId } = React.use(params);
+  return <ClientContentPlanner clientId={clientId} />;
 }

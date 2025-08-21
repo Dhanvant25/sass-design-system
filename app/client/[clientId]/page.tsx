@@ -1,9 +1,13 @@
-import { ClientDashboard } from "@/components/client/dashboard"
+"use client";
+
+import * as React from "react";
+import { ClientDashboard } from "@/components/client/dashboard";
 
 interface ClientDashboardPageProps {
-  params: { clientId: string }
+  params: Promise<{ clientId: string }>;
 }
 
 export default function ClientDashboardPage({ params }: ClientDashboardPageProps) {
-  return <ClientDashboard clientId={params.clientId} />
+  const { clientId } = React.use(params);
+  return <ClientDashboard clientId={clientId} />;
 }
