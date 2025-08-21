@@ -1,32 +1,33 @@
-"use client"
+"use client";
 
-import { Bell, Search, Settings, User } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
+import { Bell, Search, Settings, User } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { SidebarTrigger } from "@/components/ui/sidebar"
-import { useIsMobile } from "@/hooks/use-mobile"
+} from "@/components/ui/dropdown-menu";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { logout } from "@/api/auth";
 
 interface ClientHeaderProps {
-  clientId: string
+  clientId: string;
 }
 
 // Mock agency branding
 const agencyBranding = {
   name: "Digital Marketing Pro",
   primaryColor: "#6366F1",
-}
+};
 
 export function ClientHeader({ clientId }: ClientHeaderProps) {
-  const isMobile = useIsMobile()
+  const isMobile = useIsMobile();
 
   return (
     <header className="sticky top-0 z-40 border-b border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -40,7 +41,9 @@ export function ClientHeader({ clientId }: ClientHeaderProps) {
           >
             {agencyBranding.name.charAt(0)}
           </div>
-          <span className="font-semibold text-foreground">Acme Corporation</span>
+          <span className="font-semibold text-foreground">
+            Acme Corporation
+          </span>
           <Badge variant="secondary" className="text-xs">
             Pro Plan
           </Badge>
@@ -50,7 +53,10 @@ export function ClientHeader({ clientId }: ClientHeaderProps) {
           {!isMobile && (
             <div className="relative max-w-md ml-6">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input placeholder="Search content, assets..." className="pl-10 bg-muted/50" />
+              <Input
+                placeholder="Search content, assets..."
+                className="pl-10 bg-muted/50"
+              />
             </div>
           )}
         </div>
@@ -86,11 +92,11 @@ export function ClientHeader({ clientId }: ClientHeaderProps) {
                 Settings
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Log out</DropdownMenuItem>
+              <DropdownMenuItem onClick={logout}>Log out</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
       </div>
     </header>
-  )
+  );
 }

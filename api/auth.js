@@ -43,3 +43,13 @@ export const signup = async ({
 
   return user;
 };
+
+export const logout = () => {
+  Cookies.remove("accessToken");
+  Cookies.remove("refreshToken");
+  localStorage.removeItem("userData");
+
+  if (typeof window !== "undefined") {
+    window.location.href = "/auth/login";
+  }
+};

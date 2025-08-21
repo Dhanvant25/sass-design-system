@@ -22,36 +22,36 @@ const useGet = async (url, params = {}, config = {}) => {
 const usePost = async (url, body = {}, config = {}) => {
   try {
     const res = await axiosInstance.post(url, body, config);
-    return res;
+    return { res: res.data, error: null };
   } catch (err) {
-    return normalizeAxiosError(err);
+    return { res: null, error: normalizeAxiosError(err) };
   }
 };
 
 const usePut = async (url, body = {}, config = {}) => {
   try {
     const res = await axiosInstance.put(url, body, config);
-    return res;
+    return { res: res.data, error: null };
   } catch (err) {
-    return normalizeAxiosError(err);
+    return { res: null, error: normalizeAxiosError(err) };
   }
 };
 
 const usePatch = async (url, body = {}, config = {}) => {
   try {
     const res = await axiosInstance.patch(url, body, config);
-    return res;
+    return { res: res.data, error: null };
   } catch (err) {
-    return normalizeAxiosError(err);
+    return { res: null, error: normalizeAxiosError(err) };
   }
 };
 
 const useDelete = async (url, body = {}, config = {}) => {
   try {
     const res = await axiosInstance.delete(url, { data: body, ...config });
-    return res;
+    return { res: res.data, error: null };
   } catch (err) {
-    return normalizeAxiosError(err);
+    return { res: null, error: normalizeAxiosError(err) };
   }
 };
 

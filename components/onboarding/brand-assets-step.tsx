@@ -21,6 +21,10 @@ import { Upload, ImageIcon, Palette, Type, X } from "lucide-react";
 
 export interface BrandAssetsStepHandle {
   validate: () => Promise<boolean>;
+  getData: () => {
+    formData: any;
+    logoFile: File | null;
+  };
 }
 
 interface BrandAssetsStepProps {
@@ -31,6 +35,7 @@ const schema = yup.object({
   name: yup.string().required("Brand name is required"),
   tagline: yup.string(),
   description: yup.string(),
+  logoUrl: yup.string(),
 });
 
 const BrandAssetsStep: ForwardRefRenderFunction<
@@ -38,6 +43,7 @@ const BrandAssetsStep: ForwardRefRenderFunction<
   BrandAssetsStepProps
 > = ({ onNext }, ref) => {
   const [logo, setLogo] = useState<File | null>(null);
+  const [logoPreviewUrl, setLogoPreviewUrl] = useState<string>("");
   const logoInputRef = useRef<HTMLInputElement>(null);
 
   const {
@@ -46,12 +52,14 @@ const BrandAssetsStep: ForwardRefRenderFunction<
     formState: { errors },
     getValues,
     trigger,
+    setValue,
   } = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
       name: "",
       tagline: "",
       description: "",
+      logoUrl: "",
     },
   });
 
@@ -60,15 +68,28 @@ const BrandAssetsStep: ForwardRefRenderFunction<
       const isValid = await trigger();
       return isValid;
     },
+    getData() {
+      return {
+        formData: getValues(),
+        logoFile: logo,
+      };
+    },
   }));
 
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) setLogo(file);
+    if (file) {
+      setLogo(file);
+      const previewUrl = URL.createObjectURL(file);
+      setLogoPreviewUrl(previewUrl);
+      setValue("logoUrl", previewUrl);
+    }
   };
 
   const removeLogo = () => {
     setLogo(null);
+    setLogoPreviewUrl("");
+    setValue("logoUrl", "");
     if (logoInputRef.current) logoInputRef.current.value = "";
   };
 
@@ -104,8 +125,16 @@ const BrandAssetsStep: ForwardRefRenderFunction<
             {logo ? (
               <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
                 <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center border">
-                    <ImageIcon className="w-6 h-6 text-muted-foreground" />
+                  <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center border overflow-hidden">
+                    {logoPreviewUrl ? (
+                      <img
+                        src={logoPreviewUrl}
+                        alt="Logo preview"
+                        className="w-full h-full object-cover rounded-lg"
+                      />
+                    ) : (
+                      <ImageIcon className="w-6 h-6 text-muted-foreground" />
+                    )}
                   </div>
                   <div>
                     <p className="font-medium">{logo.name}</p>

@@ -12,6 +12,9 @@ import BrandAssetsStep, {
 } from "@/components/onboarding/brand-assets-step";
 import { FirstPostStep } from "@/components/onboarding/first-post-step";
 import { ArrowLeft, ArrowRight } from "lucide-react";
+import { usePost } from "@/api/apiMethode";
+import { useRouter } from "next/navigation";
+import toast, { Toaster } from "react-hot-toast";
 
 const steps = [
   { id: 1, title: "Welcome", component: WelcomeStep },
@@ -23,7 +26,10 @@ const steps = [
 export default function OnboardingPage() {
   const [currentStep, setCurrentStep] = useState(1);
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
+  const [brandAssetsData, setBrandAssetsData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const brandAssetsRef = useRef<BrandAssetsStepHandle>(null);
+  const router = useRouter();
 
   const progress = ((currentStep - 1) / (steps.length - 1)) * 100;
 
@@ -34,14 +40,47 @@ export default function OnboardingPage() {
       if (!brandAssetsRef.current) return;
       const isValid = await brandAssetsRef.current.validate();
       if (!isValid) return;
+
+      const data = brandAssetsRef.current.getData();
+      setBrandAssetsData(data);
     }
 
     if (currentStep < steps.length) {
       setCompletedSteps([...completedSteps, currentStep]);
       setCurrentStep(currentStep + 1);
     } else {
-      // Complete onboarding
-      window.location.href = "/dashboard";
+      if (brandAssetsData) {
+        const { name, tagline, description, logoUrl } =
+          brandAssetsData.formData;
+
+        const payload = {
+          name: name,
+          tagLine: tagline,
+          description: description,
+          // logo: logoUrl,
+          logo: "https://cdn.dribbble.com/userupload/42959723/file/original-e8d7c23522b6a5463d16b85b52189f4e.jpg?format=webp&resize=400x300&vertical=center",
+        };
+
+        try {
+          setIsLoading(true);
+          const { res, error } = await usePost("/api/agencies", payload);
+
+          if (error) {
+            console.error("API ERROR", error.data.message);
+            toast.error(error.data.message || "Error occurred");
+            return;
+          }
+
+          if (res?.success) {
+            router.push("/agency");
+            toast.success(res.data.message || "Agency created successfully");
+          }
+        } catch (error) {
+          console.error("Error saving brand assets:", error);
+        } finally {
+          setIsLoading(false);
+        }
+      }
     }
   };
 
@@ -137,14 +176,23 @@ export default function OnboardingPage() {
                 ))}
               </div>
 
-              <Button onClick={handleNext} className="flex items-center">
-                {currentStep === steps.length ? "Complete" : "Next"}
+              <Button
+                onClick={handleNext}
+                className="flex items-center"
+                disabled={isLoading}
+              >
+                {currentStep === steps.length
+                  ? isLoading
+                    ? "Loading..."
+                    : "Complete"
+                  : "Next"}
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </div>
           </div>
         </div>
       </div>
+      <Toaster />
     </div>
   );
 }
