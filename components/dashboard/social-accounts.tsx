@@ -1,13 +1,28 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { motion } from "framer-motion"
-import { Plus, Check, X, RefreshCw, AlertCircle, ExternalLink, Settings, Trash2 } from "lucide-react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Switch } from "@/components/ui/switch"
-import { Label } from "@/components/ui/label"
+import { useState } from "react";
+import { motion } from "framer-motion";
+import {
+  Plus,
+  Check,
+  X,
+  RefreshCw,
+  AlertCircle,
+  ExternalLink,
+  Settings,
+  Trash2,
+} from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,7 +33,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
+} from "@/components/ui/alert-dialog";
 
 const socialPlatforms = [
   {
@@ -26,7 +41,7 @@ const socialPlatforms = [
     name: "Instagram",
     icon: "📷",
     color: "from-purple-500 to-pink-500",
-    connected: true,
+    connected: false,
     account: "@yourcompany",
     followers: "8.4K",
     lastSync: "2 minutes ago",
@@ -93,33 +108,44 @@ const socialPlatforms = [
     status: "disconnected",
     autoPost: false,
   },
-]
+];
 
 export function SocialAccountsPage() {
-  const [platforms, setPlatforms] = useState(socialPlatforms)
-  const [connectingPlatform, setConnectingPlatform] = useState<string | null>(null)
+  const [platforms, setPlatforms] = useState(socialPlatforms);
+  const [connectingPlatform, setConnectingPlatform] = useState<string | null>(
+    null
+  );
 
   const handleConnect = async (platformId: string) => {
-    setConnectingPlatform(platformId)
+    // setConnectingPlatform(platformId)
     // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 2000))
+    // await new Promise((resolve) => setTimeout(resolve, 2000))
 
-    setPlatforms((prev) =>
-      prev.map((platform) =>
-        platform.id === platformId
-          ? {
-              ...platform,
-              connected: true,
-              account: `@yourcompany`,
-              followers: "0",
-              lastSync: "Just now",
-              status: "active" as const,
-            }
-          : platform,
-      ),
-    )
-    setConnectingPlatform(null)
-  }
+    const params = new URLSearchParams({
+      client_id: process.env.NEXT_PUBLIC_APP_ID ?? "",
+      redirect_uri: process.env.NEXT_PUBLIC_REDIRECT_URI ?? "",
+      scope: "user_profile,user_media",
+      response_type: "code",
+    });
+
+    window.location.href = `https://api.instagram.com/oauth/authorize?${params.toString()}`;
+
+    // setPlatforms((prev) =>
+    //   prev.map((platform) =>
+    //     platform.id === platformId
+    //       ? {
+    //           ...platform,
+    //           connected: true,
+    //           account: `@yourcompany`,
+    //           followers: "0",
+    //           lastSync: "Just now",
+    //           status: "active" as const,
+    //         }
+    //       : platform,
+    //   ),
+    // )
+    // setConnectingPlatform(null)
+  };
 
   const handleDisconnect = (platformId: string) => {
     setPlatforms((prev) =>
@@ -134,27 +160,39 @@ export function SocialAccountsPage() {
               status: "disconnected" as const,
               autoPost: false,
             }
-          : platform,
-      ),
-    )
-  }
+          : platform
+      )
+    );
+  };
 
   const handleToggleAutoPost = (platformId: string, enabled: boolean) => {
     setPlatforms((prev) =>
-      prev.map((platform) => (platform.id === platformId ? { ...platform, autoPost: enabled } : platform)),
-    )
-  }
+      prev.map((platform) =>
+        platform.id === platformId
+          ? { ...platform, autoPost: enabled }
+          : platform
+      )
+    );
+  };
 
-  const connectedCount = platforms.filter((p) => p.connected).length
+  const connectedCount = platforms.filter((p) => p.connected).length;
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Social Accounts</h1>
-            <p className="text-muted-foreground">Connect and manage your social media accounts</p>
+            <h1 className="text-3xl font-bold text-foreground">
+              Social Accounts
+            </h1>
+            <p className="text-muted-foreground">
+              Connect and manage your social media accounts
+            </p>
           </div>
           <div className="flex items-center gap-2">
             <Badge variant="secondary">
@@ -173,25 +211,41 @@ export function SocialAccountsPage() {
         <Card className="border-border/50">
           <CardHeader>
             <CardTitle>Account Overview</CardTitle>
-            <CardDescription>Your connected social media accounts and their current status</CardDescription>
+            <CardDescription>
+              Your connected social media accounts and their current status
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {platforms
                 .filter((p) => p.connected)
                 .map((platform) => (
-                  <div key={platform.id} className="flex items-center gap-3 p-3 rounded-lg border border-border/50">
+                  <div
+                    key={platform.id}
+                    className="flex items-center gap-3 p-3 rounded-lg border border-border/50"
+                  >
                     <div
                       className={`w-10 h-10 rounded-lg bg-gradient-to-br ${platform.color} flex items-center justify-center text-white text-lg`}
                     >
                       {platform.icon}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-foreground">{platform.name}</p>
-                      <p className="text-xs text-muted-foreground truncate">{platform.account}</p>
-                      <p className="text-xs text-muted-foreground">{platform.followers} followers</p>
+                      <p className="text-sm font-medium text-foreground">
+                        {platform.name}
+                      </p>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {platform.account}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {platform.followers} followers
+                      </p>
                     </div>
-                    <Badge variant={platform.status === "active" ? "default" : "secondary"} className="text-xs">
+                    <Badge
+                      variant={
+                        platform.status === "active" ? "default" : "secondary"
+                      }
+                      className="text-xs"
+                    >
                       {platform.status === "active" ? "Active" : "Warning"}
                     </Badge>
                   </div>
@@ -230,7 +284,11 @@ export function SocialAccountsPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     {platform.connected ? (
-                      <Badge variant={platform.status === "active" ? "default" : "secondary"}>
+                      <Badge
+                        variant={
+                          platform.status === "active" ? "default" : "secondary"
+                        }
+                      >
                         {platform.status === "active" ? (
                           <Check className="w-3 h-3 mr-1" />
                         ) : (
@@ -253,33 +311,52 @@ export function SocialAccountsPage() {
                     {/* Account Stats */}
                     <div className="grid grid-cols-2 gap-4 p-3 bg-muted/50 rounded-lg">
                       <div>
-                        <p className="text-xs text-muted-foreground">Followers</p>
-                        <p className="text-sm font-medium">{platform.followers}</p>
+                        <p className="text-xs text-muted-foreground">
+                          Followers
+                        </p>
+                        <p className="text-sm font-medium">
+                          {platform.followers}
+                        </p>
                       </div>
                       <div>
-                        <p className="text-xs text-muted-foreground">Last Sync</p>
-                        <p className="text-sm font-medium">{platform.lastSync}</p>
+                        <p className="text-xs text-muted-foreground">
+                          Last Sync
+                        </p>
+                        <p className="text-sm font-medium">
+                          {platform.lastSync}
+                        </p>
                       </div>
                     </div>
 
                     {/* Auto-posting Toggle */}
                     <div className="flex items-center justify-between">
                       <div>
-                        <Label htmlFor={`auto-post-${platform.id}`} className="text-sm font-medium">
+                        <Label
+                          htmlFor={`auto-post-${platform.id}`}
+                          className="text-sm font-medium"
+                        >
                           Auto-posting
                         </Label>
-                        <p className="text-xs text-muted-foreground">Automatically publish scheduled posts</p>
+                        <p className="text-xs text-muted-foreground">
+                          Automatically publish scheduled posts
+                        </p>
                       </div>
                       <Switch
                         id={`auto-post-${platform.id}`}
                         checked={platform.autoPost}
-                        onCheckedChange={(checked) => handleToggleAutoPost(platform.id, checked)}
+                        onCheckedChange={(checked) =>
+                          handleToggleAutoPost(platform.id, checked)
+                        }
                       />
                     </div>
 
                     {/* Actions */}
                     <div className="flex gap-2">
-                      <Button variant="outline" size="sm" className="flex-1 bg-transparent">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1 bg-transparent"
+                      >
                         <RefreshCw className="w-4 h-4 mr-2" />
                         Sync Now
                       </Button>
@@ -298,10 +375,13 @@ export function SocialAccountsPage() {
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
-                            <AlertDialogTitle>Disconnect {platform.name}?</AlertDialogTitle>
+                            <AlertDialogTitle>
+                              Disconnect {platform.name}?
+                            </AlertDialogTitle>
                             <AlertDialogDescription>
-                              This will disconnect your {platform.name} account and stop all scheduled posts to this
-                              platform. You can reconnect at any time.
+                              This will disconnect your {platform.name} account
+                              and stop all scheduled posts to this platform. You
+                              can reconnect at any time.
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
@@ -320,7 +400,8 @@ export function SocialAccountsPage() {
                 ) : (
                   <>
                     <p className="text-sm text-muted-foreground">
-                      Connect your {platform.name} account to start publishing content automatically.
+                      Connect your {platform.name} account to start publishing
+                      content automatically.
                     </p>
                     <Button
                       onClick={() => handleConnect(platform.id)}
@@ -359,7 +440,10 @@ export function SocialAccountsPage() {
               <AlertCircle className="w-5 h-5 text-primary" />
               Need Help?
             </CardTitle>
-            <CardDescription>Having trouble connecting your accounts? Check out our help resources.</CardDescription>
+            <CardDescription>
+              Having trouble connecting your accounts? Check out our help
+              resources.
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex flex-col sm:flex-row gap-4">
@@ -375,5 +459,5 @@ export function SocialAccountsPage() {
         </Card>
       </motion.div>
     </div>
-  )
+  );
 }
