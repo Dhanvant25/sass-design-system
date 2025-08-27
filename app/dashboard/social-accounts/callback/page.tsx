@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense } from "react";
-import Callback from "@/app/dashboard/social-accounts/callback/callback";
+import Callback from "./Callback";
 
 export default function Page() {
   return (
