@@ -124,11 +124,13 @@ export function SocialAccountsPage() {
     const params = new URLSearchParams({
       client_id: process.env.NEXT_PUBLIC_APP_ID ?? "",
       redirect_uri: process.env.NEXT_PUBLIC_REDIRECT_URI ?? "",
-      scope: "user_profile,user_media",
+      scope: "instagram_basic,instagram_manage_insights,pages_show_list",
+      // scope: "user_profile,user_media",
       response_type: "code",
     });
 
-    window.location.href = `https://api.instagram.com/oauth/authorize?${params.toString()}`;
+    // window.location.href = `https://api.instagram.com/oauth/authorize?${params.toString()}`;
+    window.location.href = `https://www.facebook.com/v23.0/dialog/oauth?${params.toString()}`;
 
     // setPlatforms((prev) =>
     //   prev.map((platform) =>
