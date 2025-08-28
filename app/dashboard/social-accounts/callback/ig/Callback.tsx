@@ -31,7 +31,7 @@ export default function Callback() {
         }
 
         setTimeout(() => {
-          // router.push("/dashboard/social-accounts");
+          router.push("/dashboard/social-accounts");
         }, 2000);
       } catch (err) {
         console.error(err);
