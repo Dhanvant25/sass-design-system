@@ -292,13 +292,15 @@ export function SocialAccountsPage() {
 
   const handleDelete = async (platformId: string) => {
     try {
-      const { res, error } = await useDelete(`/api/social/accounts/${platformId}`);
+      const { res, error } = await useDelete(
+        `/api/social/accounts/${platformId}`
+      );
 
       if (error) {
         setError(error.message || "Failed to delete social account");
         toast.error(error.message || "Failed to delete social account");
       } else {
-        toast.success(res.data.message || "Social account deleted successfully");
+        toast.success(res?.message || "Social account deleted successfully");
         getSocialAccounts();
       }
     } catch (err) {
