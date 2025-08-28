@@ -116,21 +116,38 @@ export function SocialAccountsPage() {
     null
   );
 
-  const handleConnect = async (platformId: string) => {
+  const handleConnect = async (platformId: string, platformName: string) => {
     // setConnectingPlatform(platformId)
     // Simulate API call
     // await new Promise((resolve) => setTimeout(resolve, 2000))
 
-    const params = new URLSearchParams({
-      client_id: process.env.NEXT_PUBLIC_APP_ID ?? "",
-      redirect_uri: process.env.NEXT_PUBLIC_REDIRECT_URI ?? "",
-      scope: "instagram_basic,instagram_manage_insights,pages_show_list",
-      // scope: "user_profile,user_media",
-      response_type: "code",
-    });
+    const platformLogic = {
+      instagram: {
+        apiUrl: "https://api.instagram.com/oauth/authorize",
+        redirectUri: process.env.NEXT_PUBLIC_IG_REDIRECT_URI ?? "",
+        scope: "user_profile,user_media",
+        responseType: "code",
+      },
+      facebook: {
+        apiUrl: "https://www.facebook.com/v23.0/dialog/oauth",
+        redirectUri: process.env.NEXT_PUBLIC_FB_REDIRECT_URI ?? "",
+        scope: "instagram_basic,instagram_manage_insights,pages_show_list",
+        responseType: "code",
+      },
+    };
 
-    // window.location.href = `https://api.instagram.com/oauth/authorize?${params.toString()}`;
-    window.location.href = `https://www.facebook.com/v23.0/dialog/oauth?${params.toString()}`;
+    const platform = platformLogic[platformName.toLocaleLowerCase() as keyof typeof platformLogic];
+
+    if (platform) {
+      const params = new URLSearchParams({
+        client_id: process.env.NEXT_PUBLIC_APP_ID ?? "",
+        redirect_uri: platform.redirectUri,
+        scope: platform.scope,
+        response_type: platform.responseType,
+      });
+
+      window.location.href = `${platform.apiUrl}?${params.toString()}`;
+    }
 
     // setPlatforms((prev) =>
     //   prev.map((platform) =>
@@ -406,7 +423,7 @@ export function SocialAccountsPage() {
                       content automatically.
                     </p>
                     <Button
-                      onClick={() => handleConnect(platform.id)}
+                      onClick={() => handleConnect(platform.id, platform.name)}
                       disabled={connectingPlatform === platform.id}
                       className="w-full"
                     >
