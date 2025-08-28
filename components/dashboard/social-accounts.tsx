@@ -125,7 +125,7 @@ export function SocialAccountsPage() {
       instagram: {
         // apiUrl: "https://api.instagram.com/oauth/authorize",
         apiUrl: "https://www.instagram.com/oauth/authorize",
-        clientId: process.env.NEXT_PUBLIC_INSTAGRAM_APP_ID ?? "",
+        clientId: process.env.NEXT_PUBLIC_IG_APP_ID ?? "",
         redirectUri: process.env.NEXT_PUBLIC_IG_REDIRECT_URI ?? "",
         // scope: "user_profile,user_media",
         scope:
