@@ -123,28 +123,40 @@ export function SocialAccountsPage() {
 
     const platformLogic = {
       instagram: {
-        apiUrl: "https://api.instagram.com/oauth/authorize",
+        // apiUrl: "https://api.instagram.com/oauth/authorize",
+        apiUrl: "https://www.instagram.com/oauth/authorize",
+        clientId: process.env.NEXT_PUBLIC_INSTAGRAM_APP_ID ?? "",
         redirectUri: process.env.NEXT_PUBLIC_IG_REDIRECT_URI ?? "",
-        scope: "user_profile,user_media",
+        // scope: "user_profile,user_media",
+        scope:
+          "instagram_business_basic,instagram_business_manage_messages,instagram_business_manage_comments,instagram_business_content_publish,instagram_business_manage_insights",
         responseType: "code",
       },
       facebook: {
         apiUrl: "https://www.facebook.com/v23.0/dialog/oauth",
+        clientId: process.env.NEXT_PUBLIC_APP_ID ?? "",
         redirectUri: process.env.NEXT_PUBLIC_FB_REDIRECT_URI ?? "",
         scope: "instagram_basic,instagram_manage_insights,pages_show_list",
         responseType: "code",
       },
     };
 
-    const platform = platformLogic[platformName.toLocaleLowerCase() as keyof typeof platformLogic];
+    const platform =
+      platformLogic[
+        platformName.toLocaleLowerCase() as keyof typeof platformLogic
+      ];
 
     if (platform) {
       const params = new URLSearchParams({
-        client_id: process.env.NEXT_PUBLIC_APP_ID ?? "",
+        client_id: platform.clientId,
         redirect_uri: platform.redirectUri,
         scope: platform.scope,
         response_type: platform.responseType,
       });
+
+      if (platformName.toLocaleLowerCase() === "instagram") {
+        params.set("force_reauth", "true");
+      }
 
       window.location.href = `${platform.apiUrl}?${params.toString()}`;
     }
