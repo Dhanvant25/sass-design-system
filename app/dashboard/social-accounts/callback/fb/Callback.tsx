@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useGet } from "@/api/apiMethode";
+import toast, { Toaster } from "react-hot-toast";
 
 export default function Callback() {
   const router = useRouter();
@@ -23,12 +24,15 @@ export default function Callback() {
         });
 
         if (error) {
-          console.error("Error fetching Facebook data:", error);
           setError(error.message || "Failed to authenticate");
+          toast.error(error.message || "Failed to authenticate");
         } else {
-          console.log("Facebook Auth Response:", res);
-          router.push("/dashboard");
+          toast.success("Account connected successfully!");
         }
+
+        setTimeout(() => {
+          router.push("/dashboard/social-accounts");
+        }, 2000);
       } catch (err) {
         console.error(err);
         setError("Something went wrong");
@@ -45,6 +49,7 @@ export default function Callback() {
       {loading && <p>Loading Facebook data...</p>}
       {error && <p className="text-red-500">{error}</p>}
       {!loading && !error && <p>Facebook callback successful!</p>}
+      <Toaster />
     </div>
   );
 }
