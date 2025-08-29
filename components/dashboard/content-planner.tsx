@@ -37,9 +37,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { CreatePostModal } from "@/components/dashboard/create-post-modal";
-import { useGet } from "@/api/apiMethode";
+import { useGet, useDelete } from "@/api/apiMethode";
 import { useDebounce } from "@/hooks/useDebounce";
 import moment from "moment";
+import toast, { Toaster } from "react-hot-toast";
 
 const scheduledPosts = [
   {
@@ -126,6 +127,7 @@ export function ContentPlannerPage() {
   const [selectedStatus, setSelectedStatus] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [editid, setEditid] = useState<number | null>(null);
   const [postsData, setPostsData] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -187,12 +189,10 @@ export function ContentPlannerPage() {
     const dateFilter = selectedDate
       ? new Date(selectedDate.setUTCHours(0, 0, 0, 0)).toISOString()
       : "";
-    
-    console.log("selectedDate", selectedDate, "dateFilter", dateFilter);
 
     try {
       const { res, error } = await useGet(
-        `/api/posts?search=${search}&platform=${platform}&status=${status}&date=${dateFilter}`
+        `/api/posts?search=${search}&platform=${platform}&status=${status}&date=`
       );
 
       if (error) {
@@ -209,6 +209,24 @@ export function ContentPlannerPage() {
       console.error("Unexpected error while fetching users:", err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id: string | number) => {
+    try {
+      const { res, error } = await useDelete(`/api/posts/${id}`);
+
+      if (error) {
+        console.error("API ERROR", error);
+        return;
+      }
+
+      if (res?.success) {
+        getAllPosts();
+        toast.success(res?.message || "Post deleted successfully");
+      }
+    } catch (err) {
+      console.error("Unexpected error while deleting user:", err);
     }
   };
 
@@ -422,7 +440,7 @@ export function ContentPlannerPage() {
                                 <Eye className="w-4 h-4 mr-2" />
                                 Preview
                               </DropdownMenuItem>
-                              <DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => {setShowCreateModal(true); setEditid(post.id)}}>
                                 <Edit className="w-4 h-4 mr-2" />
                                 Edit
                               </DropdownMenuItem>
@@ -430,7 +448,10 @@ export function ContentPlannerPage() {
                                 <Copy className="w-4 h-4 mr-2" />
                                 Duplicate
                               </DropdownMenuItem>
-                              <DropdownMenuItem className="text-red-600">
+                              <DropdownMenuItem
+                                className="text-red-600"
+                                onClick={() => handleDelete(post.id)}
+                              >
                                 <Trash2 className="w-4 h-4 mr-2" />
                                 Delete
                               </DropdownMenuItem>
@@ -549,7 +570,7 @@ export function ContentPlannerPage() {
                                 <Eye className="w-4 h-4 mr-2" />
                                 Preview
                               </DropdownMenuItem>
-                              <DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => {setShowCreateModal(true); setEditid(post.id)}}>
                                 <Edit className="w-4 h-4 mr-2" />
                                 Edit
                               </DropdownMenuItem>
@@ -557,7 +578,10 @@ export function ContentPlannerPage() {
                                 <Copy className="w-4 h-4 mr-2" />
                                 Duplicate
                               </DropdownMenuItem>
-                              <DropdownMenuItem className="text-red-600">
+                              <DropdownMenuItem
+                                className="text-red-600"
+                                onClick={() => handleDelete(post.id)}
+                              >
                                 <Trash2 className="w-4 h-4 mr-2" />
                                 Delete
                               </DropdownMenuItem>
@@ -578,7 +602,9 @@ export function ContentPlannerPage() {
       <CreatePostModal
         open={showCreateModal}
         onOpenChange={setShowCreateModal}
+        editid={editid}
       />
+      <Toaster />
     </div>
   );
 }

@@ -5,7 +5,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { postSchema } from "@/schema/dashboard/postSchema";
 
 import * as yup from "yup";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   X,
   ImageIcon,
@@ -34,8 +34,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { usePost } from "@/api/apiMethode";
+import { usePost, usePut, useGet } from "@/api/apiMethode";
 import toast, { Toaster } from "react-hot-toast";
+import moment from "moment";
 
 const platforms = [
   {
@@ -83,9 +84,10 @@ type FormValues = {
 interface CreatePostModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  editid: string | number | null;
 }
 
-export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
+export function CreatePostModal({ open, onOpenChange, editid }: CreatePostModalProps) {
   const [selectedMedia, setSelectedMedia] = useState<File | null>(null);
   type AnyPresentValue = any; // Add this type to handle the File type in the form
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
@@ -153,7 +155,11 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
     };
 
     try {
-      const { res, error } = await usePost("/api/posts", payload);
+
+      const method = editid ? usePut : usePost;
+      const url = editid ? `/api/posts/${editid}` : "/api/posts";
+
+      const { res, error } = await method(url, payload);
 
       if (error) {
         console.error("API ERROR", error);
@@ -162,7 +168,6 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
       }
 
       if (res?.success) {
-        console.log("respose", res);
         toast.success(res?.message || "Post created successfully");
         onOpenChange(false);
         reset();
@@ -172,6 +177,35 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
       toast.error("Error occurred");
     }
   };
+
+  const getPostById = async (id: string | number) => {
+    try {
+      const { res, error } = await useGet(`/api/posts/${id}`);
+
+      if (error) {
+        console.error("API ERROR", error);
+        return;
+      }
+
+      if (res?.success) {
+        const post = res?.data;
+        setValue("postTitle", post.title);
+        setValue("postContent", post.content);
+        setValue("scheduledDate", moment(post.scheduleDate).format("YYYY-MM-DD"));
+        setValue("scheduledTime", post.scheduleTime);
+        setValue("selectedPlatforms", post.platforms);
+      }
+    } catch (error) {
+      console.error("API ERROR", error);
+      toast.error("Error occurred");
+    }
+  };
+
+  useEffect(() => {
+    if (editid) {
+      getPostById(editid);
+    }
+  }, [editid]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -439,7 +473,7 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
               onClick={() => setStatus("draft")}
             >
               <Save className="w-4 h-4 mr-2" />
-              Save Draft
+              {editid ? "Update" : "Save"} Draft
             </Button>
             <Button
               type="submit"
