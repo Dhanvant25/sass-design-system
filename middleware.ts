@@ -67,6 +67,7 @@ export function middleware(request: NextRequest) {
 
   // Handle authenticated users
   if (accessToken) {
+    console.log("userData middleware", userData, userData.isOnboardingCompleted);
     // Prevent access to agency dashboard if onboarding not completed
     if (
       pathname.startsWith("/agency") &&

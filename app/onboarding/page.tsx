@@ -15,6 +15,8 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 import { usePost } from "@/api/apiMethode";
 import { useRouter } from "next/navigation";
 import toast, { Toaster } from "react-hot-toast";
+import { useAuth } from "@/store/AuthContext";
+import { useEffect } from "react";
 
 const steps = [
   { id: 1, title: "Welcome", component: WelcomeStep },
@@ -30,6 +32,7 @@ export default function OnboardingPage() {
   const [isLoading, setIsLoading] = useState(false);
   const brandAssetsRef = useRef<BrandAssetsStepHandle>(null);
   const router = useRouter();
+  const { userData, setUserData } = useAuth();
 
   const progress = ((currentStep - 1) / (steps.length - 1)) * 100;
 
@@ -72,8 +75,11 @@ export default function OnboardingPage() {
           }
 
           if (res?.success) {
-            router.push("/agency");
             toast.success(res.data.message || "Agency created successfully");
+            setUserData({ ...userData, isOnboardingCompleted: true });
+            localStorage.setItem("userData", JSON.stringify(userData));
+            router.refresh();
+            router.push("/agency");
           }
         } catch (error) {
           console.error("Error saving brand assets:", error);
