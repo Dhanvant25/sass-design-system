@@ -175,11 +175,24 @@ export function ContentPlannerPage() {
     }
   };
 
-  const getAllPosts = async (search = "", platform = "", status = "") => {
+  const getAllPosts = async (
+    search = "",
+    platform = "",
+    status = "",
+    date = ""
+  ) => {
     setLoading(true);
+
+    // convert selectedDate to ISO string and append 'T00:00:00.000Z' to get midnight of that date
+    const dateFilter = selectedDate
+      ? new Date(selectedDate.setUTCHours(0, 0, 0, 0)).toISOString()
+      : "";
+    
+    console.log("selectedDate", selectedDate, "dateFilter", dateFilter);
+
     try {
       const { res, error } = await useGet(
-        `/api/posts?search=${search}&platform=${platform}&status=${status}`
+        `/api/posts?search=${search}&platform=${platform}&status=${status}&date=${dateFilter}`
       );
 
       if (error) {
@@ -207,9 +220,10 @@ export function ContentPlannerPage() {
     getAllPosts(
       debouncedSearch,
       selectedPlatform === "all" ? "" : selectedPlatform,
-      selectedStatus === "all" ? "" : selectedStatus
+      selectedStatus === "all" ? "" : selectedStatus,
+      selectedDate ? selectedDate.toISOString() : ""
     );
-  }, [debouncedSearch, selectedPlatform, selectedStatus]);
+  }, [debouncedSearch, selectedPlatform, selectedStatus, selectedDate]);
 
   useEffect(() => {
     if (!showCreateModal) {
