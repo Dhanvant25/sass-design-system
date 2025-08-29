@@ -34,6 +34,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { usePost } from "@/api/apiMethode";
+import toast, { Toaster } from "react-hot-toast";
 
 const platforms = [
   {
@@ -69,14 +71,14 @@ const aiSuggestions = [
   "🎯 Behind the scenes: Take a look at our team's creative process and see how we bring ideas to life. What's your creative process like?",
 ];
 
-interface FormValues {
+type FormValues = {
   postTitle: string;
   postContent: string;
   scheduledDate: string;
   scheduledTime: string;
-  selectedPlatforms?: string[];
-  mediaFile: File;
-}
+  selectedPlatforms: string[];
+  mediaFile: File | null;
+};
 
 interface CreatePostModalProps {
   open: boolean;
@@ -85,16 +87,19 @@ interface CreatePostModalProps {
 
 export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
   const [selectedMedia, setSelectedMedia] = useState<File | null>(null);
+  type AnyPresentValue = any; // Add this type to handle the File type in the form
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
+  const [status, setStatus] = useState("draft");
 
   const {
     register,
     handleSubmit,
     setValue,
     watch,
+    reset,
     formState: { errors },
   } = useForm<FormValues>({
-    resolver: yupResolver(postSchema),
+    resolver: yupResolver(postSchema as any),
     defaultValues: {
       postTitle: "",
       postContent: "",
@@ -123,7 +128,7 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
     const file = e.target.files?.[0];
     if (file) {
       setSelectedMedia(file);
-       setValue("mediaFile", file, { shouldValidate: true });
+      setValue("mediaFile", file, { shouldValidate: true });
     }
   };
 
@@ -136,9 +141,36 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
     setIsGeneratingAI(false);
   };
 
-  const onSubmit = (data: FormValues) => {
-    console.log("Form submitted:", data);
-    onOpenChange(false);
+  const onSubmit = async (data: FormValues) => {
+    const payload = {
+      title: data.postTitle,
+      content: data.postContent,
+      mediaUrl: "https://example.com/product-launch.png",
+      platforms: data.selectedPlatforms,
+      scheduleDate: data.scheduledDate,
+      scheduleTime: data.scheduledTime,
+      status: status,
+    };
+
+    try {
+      const { res, error } = await usePost("/api/posts", payload);
+
+      if (error) {
+        console.error("API ERROR", error);
+        toast.error(error?.message || "Error occurred");
+        return;
+      }
+
+      if (res?.success) {
+        console.log("respose", res);
+        toast.success(res?.message || "Post created successfully");
+        onOpenChange(false);
+        reset();
+      }
+    } catch (error) {
+      console.error("API ERROR", error);
+      toast.error("Error occurred");
+    }
   };
 
   return (
@@ -287,12 +319,12 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
                     </Button>
                   </div>
                 )}
-                    </div>
-                {errors.mediaFile && (
-                  <p className="text-sm text-red-500">
-                    {errors.mediaFile.message}
-                  </p>
-                )}
+              </div>
+              {errors.mediaFile && (
+                <p className="text-sm text-red-500">
+                  {errors.mediaFile.message}
+                </p>
+              )}
             </div>
 
             {/* Scheduling */}
@@ -404,6 +436,7 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
               type="submit"
               variant="outline"
               className="flex-1 bg-transparent"
+              onClick={() => setStatus("draft")}
             >
               <Save className="w-4 h-4 mr-2" />
               Save Draft
@@ -412,17 +445,23 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
               type="submit"
               variant="outline"
               className="flex-1 bg-transparent"
+              onClick={() => setStatus("scheduled")}
             >
               <Clock className="w-4 h-4 mr-2" />
               Schedule Post
             </Button>
-            <Button type="submit" className="flex-1">
+            <Button
+              type="submit"
+              className="flex-1"
+              onClick={() => setStatus("published")}
+            >
               <Send className="w-4 h-4 mr-2" />
               Publish Now
             </Button>
           </div>
         </form>
       </DialogContent>
+      <Toaster />
     </Dialog>
   );
 }

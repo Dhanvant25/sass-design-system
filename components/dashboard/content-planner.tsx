@@ -1,16 +1,45 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { motion } from "framer-motion"
-import { CalendarIcon, Plus, Search, MoreHorizontal, Edit, Trash2, Copy, Eye } from "lucide-react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
-import { Calendar } from "@/components/ui/calendar"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { CreatePostModal } from "@/components/dashboard/create-post-modal"
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import {
+  CalendarIcon,
+  Plus,
+  Search,
+  MoreHorizontal,
+  Edit,
+  Trash2,
+  Copy,
+  Eye,
+} from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { CreatePostModal } from "@/components/dashboard/create-post-modal";
+import { useGet } from "@/api/apiMethode";
+import { useDebounce } from "@/hooks/useDebounce";
+import moment from "moment";
 
 const scheduledPosts = [
   {
@@ -38,7 +67,8 @@ const scheduledPosts = [
   {
     id: 3,
     title: "Behind the scenes video",
-    content: "Take a peek behind the scenes of our latest photoshoot! 🎬 #BehindTheScenes #TeamWork",
+    content:
+      "Take a peek behind the scenes of our latest photoshoot! 🎬 #BehindTheScenes #TeamWork",
     platform: "TikTok",
     scheduledTime: "2024-01-16T18:00:00",
     status: "draft",
@@ -56,7 +86,7 @@ const scheduledPosts = [
     image: null,
     engagement: { likes: 24, comments: 8, shares: 12 },
   },
-]
+];
 
 const platforms = [
   { value: "all", label: "All Platforms" },
@@ -65,72 +95,144 @@ const platforms = [
   { value: "twitter", label: "Twitter" },
   { value: "tiktok", label: "TikTok" },
   { value: "facebook", label: "Facebook" },
-]
+];
 
 const statusOptions = [
   { value: "all", label: "All Status" },
   { value: "draft", label: "Draft" },
   { value: "scheduled", label: "Scheduled" },
   { value: "published", label: "Published" },
-]
+];
+
+interface Post {
+  id: number;
+  title: string;
+  content: string;
+  mediaUrl: string;
+  platforms: string[];
+  scheduleDate: string;
+  scheduleTime: string;
+  status: string;
+  image: string | null;
+  engagement: { likes: number; comments: number; shares: number };
+}
 
 export function ContentPlannerPage() {
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date())
-  const [viewMode, setViewMode] = useState<"calendar" | "list">("calendar")
-  const [selectedPlatform, setSelectedPlatform] = useState("all")
-  const [selectedStatus, setSelectedStatus] = useState("all")
-  const [searchQuery, setSearchQuery] = useState("")
-  const [showCreateModal, setShowCreateModal] = useState(false)
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(
+    new Date()
+  );
+  const [viewMode, setViewMode] = useState<"calendar" | "list">("calendar");
+  const [selectedPlatform, setSelectedPlatform] = useState("all");
+  const [selectedStatus, setSelectedStatus] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [postsData, setPostsData] = useState<Post[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const debouncedSearch = useDebounce(searchQuery, 500);
 
   const filteredPosts = scheduledPosts.filter((post) => {
-    const matchesPlatform = selectedPlatform === "all" || post.platform.toLowerCase() === selectedPlatform
-    const matchesStatus = selectedStatus === "all" || post.status === selectedStatus
+    const matchesPlatform =
+      selectedPlatform === "all" ||
+      post.platform.toLowerCase() === selectedPlatform;
+    const matchesStatus =
+      selectedStatus === "all" || post.status === selectedStatus;
     const matchesSearch =
       searchQuery === "" ||
       post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      post.content.toLowerCase().includes(searchQuery.toLowerCase())
+      post.content.toLowerCase().includes(searchQuery.toLowerCase());
 
-    return matchesPlatform && matchesStatus && matchesSearch
-  })
+    return matchesPlatform && matchesStatus && matchesSearch;
+  });
 
   const getPlatformColor = (platform: string) => {
     switch (platform.toLowerCase()) {
       case "instagram":
-        return "from-purple-500 to-pink-500"
+        return "from-purple-500 to-pink-500";
       case "linkedin":
-        return "from-blue-600 to-blue-700"
+        return "from-blue-600 to-blue-700";
       case "twitter":
-        return "from-gray-800 to-black"
+        return "from-gray-800 to-black";
       case "tiktok":
-        return "from-black to-red-500"
+        return "from-black to-red-500";
       case "facebook":
-        return "from-blue-500 to-blue-600"
+        return "from-blue-500 to-blue-600";
       default:
-        return "from-gray-500 to-gray-600"
+        return "from-gray-500 to-gray-600";
     }
-  }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case "published":
-        return "default"
+        return "default";
       case "scheduled":
-        return "secondary"
+        return "secondary";
       case "draft":
-        return "outline"
+        return "outline";
       default:
-        return "outline"
+        return "outline";
     }
-  }
+  };
+
+  const getAllPosts = async (search = "", platform = "", status = "") => {
+    setLoading(true);
+    try {
+      const { res, error } = await useGet(
+        `/api/posts?search=${search}&platform=${platform}&status=${status}`
+      );
+
+      if (error) {
+        console.error("API ERROR", error);
+        return;
+      }
+
+      if (res?.success) {
+        setPostsData(res.data || []);
+      } else {
+        setPostsData([]);
+      }
+    } catch (err) {
+      console.error("Unexpected error while fetching users:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    getAllPosts();
+  }, []);
+
+  useEffect(() => {
+    getAllPosts(
+      debouncedSearch,
+      selectedPlatform === "all" ? "" : selectedPlatform,
+      selectedStatus === "all" ? "" : selectedStatus
+    );
+  }, [debouncedSearch, selectedPlatform, selectedStatus]);
+
+  useEffect(() => {
+    if (!showCreateModal) {
+      getAllPosts();
+    }
+  }, [showCreateModal]);
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Content Planner</h1>
-            <p className="text-muted-foreground">Plan, schedule, and manage your social media content</p>
+            <h1 className="text-3xl font-bold text-foreground">
+              Content Planner
+            </h1>
+            <p className="text-muted-foreground">
+              Plan, schedule, and manage your social media content
+            </p>
           </div>
           <div className="flex items-center gap-2">
             <Button
@@ -141,7 +243,11 @@ export function ContentPlannerPage() {
               <CalendarIcon className="w-4 h-4 mr-2" />
               Calendar
             </Button>
-            <Button variant={viewMode === "list" ? "default" : "outline"} size="sm" onClick={() => setViewMode("list")}>
+            <Button
+              variant={viewMode === "list" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setViewMode("list")}
+            >
               List
             </Button>
             <Button onClick={() => setShowCreateModal(true)}>
@@ -170,7 +276,10 @@ export function ContentPlannerPage() {
                   className="pl-10"
                 />
               </div>
-              <Select value={selectedPlatform} onValueChange={setSelectedPlatform}>
+              <Select
+                value={selectedPlatform}
+                onValueChange={setSelectedPlatform}
+              >
                 <SelectTrigger className="w-full sm:w-48">
                   <SelectValue />
                 </SelectTrigger>
@@ -233,162 +342,229 @@ export function ContentPlannerPage() {
                 <CardTitle className="text-lg">
                   {selectedDate ? selectedDate.toDateString() : "Select a date"}
                 </CardTitle>
-                <CardDescription>{filteredPosts.length} posts scheduled</CardDescription>
+                <CardDescription>
+                  {postsData.length} posts scheduled
+                </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                {filteredPosts.map((post) => (
-                  <div
-                    key={post.id}
-                    className="flex items-start gap-4 p-4 rounded-lg border border-border/50 hover:bg-muted/50 transition-colors"
-                  >
-                    {post.image && (
-                      <img
-                        src={post.image || "/placeholder.svg"}
-                        alt={post.title}
-                        className="w-16 h-16 rounded-lg object-cover"
-                      />
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-2">
-                        <div
-                          className={`w-6 h-6 rounded bg-gradient-to-br ${getPlatformColor(post.platform)} flex items-center justify-center text-white text-xs font-bold`}
-                        >
-                          {post.platform.charAt(0)}
+
+              {loading ? (
+                <div className="p-6 pt-0">
+                  <p>Loading...</p>
+                </div>
+              ) : (
+                <CardContent className="space-y-4">
+                  {postsData.map((post) => (
+                    <div
+                      key={post.id}
+                      className="flex items-start gap-4 p-4 rounded-lg border border-border/50 hover:bg-muted/50 transition-colors"
+                    >
+                      {post.image && (
+                        <img
+                          src={post.image || "/placeholder.svg"}
+                          alt={post.title}
+                          className="w-16 h-16 rounded-lg object-cover"
+                        />
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div
+                            className={`w-6 h-6 rounded bg-gradient-to-br ${getPlatformColor(
+                              post.platforms[0]
+                            )} flex items-center justify-center text-white text-xs font-bold`}
+                          >
+                            {post.platforms[0].charAt(0)}
+                          </div>
+                          <h3 className="font-medium text-foreground">
+                            {post.title}
+                          </h3>
+                          <Badge
+                            variant={getStatusColor(post.status)}
+                            className="text-xs"
+                          >
+                            {post.status}
+                          </Badge>
                         </div>
-                        <h3 className="font-medium text-foreground">{post.title}</h3>
-                        <Badge variant={getStatusColor(post.status)} className="text-xs">
-                          {post.status}
-                        </Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground line-clamp-2 mb-2">{post.content}</p>
-                      <div className="flex items-center justify-between">
-                        <p className="text-xs text-muted-foreground">{new Date(post.scheduledTime).toLocaleString()}</p>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm">
-                              <MoreHorizontal className="w-4 h-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem>
-                              <Eye className="w-4 h-4 mr-2" />
-                              Preview
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
-                              <Edit className="w-4 h-4 mr-2" />
-                              Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
-                              <Copy className="w-4 h-4 mr-2" />
-                              Duplicate
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="text-red-600">
-                              <Trash2 className="w-4 h-4 mr-2" />
-                              Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                        <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
+                          {post.content}
+                        </p>
+                        <div className="flex items-center justify-between">
+                          <p className="text-xs text-muted-foreground">
+                            {/* {new Date(post.scheduleTime).toLocaleString()} */}{" "}
+                            {moment(post.scheduleDate).format("DD-MM-YYYY")}{" "}
+                            {post.scheduleTime
+                              ? moment(post.scheduleTime, "HH:mm:ss").format(
+                                  "hh:mm A"
+                                )
+                              : "-"}
+                          </p>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm">
+                                <MoreHorizontal className="w-4 h-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem>
+                                <Eye className="w-4 h-4 mr-2" />
+                                Preview
+                              </DropdownMenuItem>
+                              <DropdownMenuItem>
+                                <Edit className="w-4 h-4 mr-2" />
+                                Edit
+                              </DropdownMenuItem>
+                              <DropdownMenuItem>
+                                <Copy className="w-4 h-4 mr-2" />
+                                Duplicate
+                              </DropdownMenuItem>
+                              <DropdownMenuItem className="text-red-600">
+                                <Trash2 className="w-4 h-4 mr-2" />
+                                Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-                {filteredPosts.length === 0 && (
-                  <div className="text-center py-8">
-                    <p className="text-muted-foreground">No posts scheduled for this date</p>
-                    <Button variant="outline" className="mt-4 bg-transparent" onClick={() => setShowCreateModal(true)}>
-                      <Plus className="w-4 h-4 mr-2" />
-                      Create Post
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
+                  ))}
+                  {!loading && (
+                    <>
+                      {postsData.length === 0 && (
+                        <div className="text-center py-8">
+                          <p className="text-muted-foreground">
+                            No posts scheduled for this date
+                          </p>
+                          <Button
+                            variant="outline"
+                            className="mt-4 bg-transparent"
+                            onClick={() => setShowCreateModal(true)}
+                          >
+                            <Plus className="w-4 h-4 mr-2" />
+                            Create Post
+                          </Button>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </CardContent>
+              )}
             </Card>
           </motion.div>
         </div>
       ) : (
-        /* List View */
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-        >
-          <Card className="border-border/50">
-            <CardHeader>
-              <CardTitle>All Posts</CardTitle>
-              <CardDescription>{filteredPosts.length} posts found</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {filteredPosts.map((post) => (
-                <div
-                  key={post.id}
-                  className="flex items-start gap-4 p-4 rounded-lg border border-border/50 hover:bg-muted/50 transition-colors"
-                >
-                  {post.image && (
-                    <img
-                      src={post.image || "/placeholder.svg"}
-                      alt={post.title}
-                      className="w-20 h-20 rounded-lg object-cover"
-                    />
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-2">
-                      <div
-                        className={`w-6 h-6 rounded bg-gradient-to-br ${getPlatformColor(post.platform)} flex items-center justify-center text-white text-xs font-bold`}
-                      >
-                        {post.platform.charAt(0)}
+        <>
+          {loading ? (
+            <div className="p-6 pt-0">
+              <p>Loading...</p>
+            </div>
+          ) : (
+            /* List View */
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
+              <Card className="border-border/50">
+                <CardHeader>
+                  <CardTitle>All Posts</CardTitle>
+                  <CardDescription>
+                    {postsData.length} posts found
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {postsData.map((post) => (
+                    <div
+                      key={post.id}
+                      className="flex items-start gap-4 p-4 rounded-lg border border-border/50 hover:bg-muted/50 transition-colors"
+                    >
+                      {post.image && (
+                        <img
+                          src={post.image || "/placeholder.svg"}
+                          alt={post.title}
+                          className="w-20 h-20 rounded-lg object-cover"
+                        />
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div
+                            className={`w-6 h-6 rounded bg-gradient-to-br ${getPlatformColor(
+                              post.platforms[0]
+                            )} flex items-center justify-center text-white text-xs font-bold`}
+                          >
+                            {post.platforms[0].charAt(0)}
+                          </div>
+                          <h3 className="font-medium text-foreground">
+                            {post.title}
+                          </h3>
+                          <Badge
+                            variant={getStatusColor(post.status)}
+                            className="text-xs"
+                          >
+                            {post.status}
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground line-clamp-3 mb-3">
+                          {post.content}
+                        </p>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                            <span>{post.platforms.join(", ")} </span>
+                            <span>
+                              {/* {new Date(post.scheduleTime).toLocaleString()} */}
+                              {moment(post.scheduleDate).format("DD-MM-YYYY")}{" "}
+                              {post.scheduleTime
+                                ? moment(post.scheduleTime, "HH:mm:ss").format(
+                                    "hh:mm A"
+                                  )
+                                : "-"}
+                            </span>
+                            {post.status === "published" && (
+                              <span>
+                                {/* {post?.engagement?.likes} likes,{" "} */}
+                                {/* {post?.engagement?.comments} comments */}
+                              </span>
+                            )}
+                          </div>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm">
+                                <MoreHorizontal className="w-4 h-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem>
+                                <Eye className="w-4 h-4 mr-2" />
+                                Preview
+                              </DropdownMenuItem>
+                              <DropdownMenuItem>
+                                <Edit className="w-4 h-4 mr-2" />
+                                Edit
+                              </DropdownMenuItem>
+                              <DropdownMenuItem>
+                                <Copy className="w-4 h-4 mr-2" />
+                                Duplicate
+                              </DropdownMenuItem>
+                              <DropdownMenuItem className="text-red-600">
+                                <Trash2 className="w-4 h-4 mr-2" />
+                                Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
                       </div>
-                      <h3 className="font-medium text-foreground">{post.title}</h3>
-                      <Badge variant={getStatusColor(post.status)} className="text-xs">
-                        {post.status}
-                      </Badge>
                     </div>
-                    <p className="text-sm text-muted-foreground line-clamp-3 mb-3">{post.content}</p>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                        <span>{post.platform}</span>
-                        <span>{new Date(post.scheduledTime).toLocaleString()}</span>
-                        {post.status === "published" && (
-                          <span>
-                            {post.engagement.likes} likes, {post.engagement.comments} comments
-                          </span>
-                        )}
-                      </div>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm">
-                            <MoreHorizontal className="w-4 h-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem>
-                            <Eye className="w-4 h-4 mr-2" />
-                            Preview
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>
-                            <Edit className="w-4 h-4 mr-2" />
-                            Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>
-                            <Copy className="w-4 h-4 mr-2" />
-                            Duplicate
-                          </DropdownMenuItem>
-                          <DropdownMenuItem className="text-red-600">
-                            <Trash2 className="w-4 h-4 mr-2" />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        </motion.div>
+                  ))}
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+        </>
       )}
 
       {/* Create Post Modal */}
-      <CreatePostModal open={showCreateModal} onOpenChange={setShowCreateModal} />
+      <CreatePostModal
+        open={showCreateModal}
+        onOpenChange={setShowCreateModal}
+      />
     </div>
-  )
+  );
 }
